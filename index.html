@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D 娃娃背包包模擬器</title>
+    <style>
+        /* 基礎網頁樣式設定 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            display: flex;
+            gap: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* 左側控制面板 */
+        .control-panel {
+            width: 300px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input[type="range"] {
+            width: 100%;
+        }
+
+        .color-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        .color-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* 右側顯示區域 */
+        .display-area {
+            flex: 1;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 畫布容器：固定在中央，方便物件絕對定位 */
+        .canvas {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 娃娃素體（粉紅色圓角矩形） */
+        .doll {
+            position: absolute;
+            background-color: #ffb6c1; /* 基礎粉紅色 */
+            border-radius: 20px;
+            transition: width 0.1s, height 0.1s; /* 讓縮放看起來平滑一點 */
+        }
+
+        /* 包包主體（黃色小方塊） */
+        .bag {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background-color: #ffd700; /* 預設黃色 */
+            border-radius: 5px;
+            z-index: 10; /* 確保包包在娃娃上面 */
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 5px;
+            box-sizing: border-box;
+        }
+
+        /* 包包細節區塊（前口袋） */
+        .bag-detail {
+            width: 40px;
+            height: 25px;
+            background-color: #ff4500; /* 預設橘紅色細節 */
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="control-panel">
+        <h2>模擬器控制台</h2>
+        <hr>
+        
+        <div class="control-group">
+            <label for="doll-size">娃娃尺寸調整</label>
+            <input type="range" id="doll-size" min="100" max="300" value="200">
+        </div>
+
+        <div class="control-group">
+            <label>包包主體顏色</label>
+            <div class="color-btns">
+                <button class="color-btn" style="background-color: #ff4d4d;" onclick="changeBagColor('#ff4d4d')">紅色</button>
+                <button class="color-btn" style="background-color: #4da6ff;" onclick="changeBagColor('#4da6ff')">藍色</button>
+                <button class="color-btn" style="background-color: #5cd65c;" onclick="changeBagColor('#5cd65c')">綠色</button>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>包包細節（口袋）顏色</label>
+            <div class="color-btns">
+                <button class="color-btn" style="background-color: #ffffff; color: #333; border: 1px solid #ccc;" onclick="changeDetailColor('#ffffff')">白色</button>
+                <button class="color-btn" style="background-color: #333333;" onclick="changeDetailColor('#333333')">黑色</button>
+                <button class="color-btn" style="background-color: #ffb31a;" onclick="changeDetailColor('#ffb31a')">黃色</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="display-area">
+        <div class="canvas">
+            <div id="doll" class="doll" style="width: 200px; height: 200px;"></div>
+            
+            <div id="bag" class="bag">
+                <div id="bag-detail" class="bag-detail"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 取得網頁上的元件
+        const doll = document.getElementById('doll');
+        const dollSizeSlider = document.getElementById('doll-size');
+        const bag = document.getElementById('bag');
+        const bagDetail = document.getElementById('bag-detail');
+
+        // 1. 監聽滑桿連動娃娃尺寸
+        dollSizeSlider.addEventListener('input', (e) => {
+            const size = e.target.value;
+            // 同時改變寬度與高度，讓它等比例放大縮小
+            doll.style.width = size + 'px';
+            doll.style.height = size + 'px';
+        });
+
+        // 2. 改變包包主體顏色的功能
+        function changeBagColor(color) {
+            bag.style.backgroundColor = color;
+        }
+
+        // 3. 改變包包細節顏色的功能
+        function changeDetailColor(color) {
+            bagDetail.style.backgroundColor = color;
+        }
+    </script>
+</body>
+</html>
