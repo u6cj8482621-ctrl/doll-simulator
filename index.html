@@ -18,19 +18,19 @@
 
         /* 左側控制面板 */
         .control-panel {
-            width: 320px;
+            width: 340px;
             background-color: #ffffff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 18px;
             overflow-y: auto;
         }
 
         h2 {
-            margin: 0 0 10px 0;
+            margin: 0 0 5px 0;
             font-size: 1.5rem;
             color: #333;
         }
@@ -38,12 +38,23 @@
         .control-group {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
+        }
+
+        .dynamic-group {
+            background-color: #f9f9f9;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #ffb6c1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
         label {
             font-weight: bold;
             color: #555;
+            font-size: 0.95rem;
         }
 
         select {
@@ -52,22 +63,7 @@
             border: 1px solid #ccc;
             font-size: 1rem;
             width: 100%;
-        }
-
-        .color-btns {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .color-btn {
-            padding: 8px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            color: white;
-            font-weight: bold;
-            min-width: 60px;
+            background-color: #fff;
         }
 
         /* 右側顯示區域 */
@@ -84,185 +80,325 @@
         }
 
         /* 1*1CM 淺灰色線條背景畫布 */
-        /* 這裡假設網頁上的 1cm 大約等於 38 像素(px)，可以根據視覺效果自由調整比例 */
         .canvas {
             position: relative;
             width: 500px;
             height: 500px;
             border: 2px solid #ccc;
             background-color: #fafafa;
-            /* 建立 1cm * 1cm 的網格背景 */
             background-image: 
-                linear-gradient(to right, #e0e0e0 1px, transparent 1px),
-                linear-gradient(to bottom, #e0e0e0 1px, transparent 1px);
+                linear-gradient(to right, #e8e8e8 1px, transparent 1px),
+                linear-gradient(to bottom, #e8e8e8 1px, transparent 1px);
             background-size: 38px 38px; 
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        /* 娃娃素體（粉紅色圓角矩形） */
-        .doll {
+        /* 娃娃素體容器 */
+        .doll-container {
             position: absolute;
-            background-color: #ffb6c1;
-            border-radius: 15px;
-            transition: all 0.2s ease; /* 讓切換尺寸時有平滑動畫 */
-            bottom: 114px; /* 讓娃娃對齊某個網格底部線條 */
-        }
-
-        /* 包包主體 */
-        .bag {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background-color: #ffd700;
-            border-radius: 5px;
-            z-index: 10;
+            bottom: 90px;
+            transition: all 0.2s ease;
             display: flex;
             justify-content: center;
-            align-items: flex-end;
-            padding-bottom: 5px;
-            box-sizing: border-box;
-            /* 預設在畫布中央附近 */
-            bottom: 180px; 
+            align-items: center;
         }
 
-        /* 包包細節區塊（前口袋） */
-        .bag-detail {
-            width: 34px;
-            height: 20px;
-            background-color: #ff4500;
-            border-radius: 3px;
+        /* 膚色色塊基礎（遮色片效果層） */
+        .doll-skin {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 30px;
+            background-color: #fcd7b8; /* 預設普肌 */
             transition: background-color 0.2s;
+            z-index: 1;
+        }
+
+        /* 素體線稿層（模擬黑線外框與細節） */
+        .doll-outline {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 30px;
+            border: 3px solid #4a4a4a;
+            box-sizing: border-box;
+            z-index: 2;
+            /* 模擬可愛棉花娃略帶圓潤的肚皮線稿 */
+            box-shadow: inset 0 -15px 0 rgba(0,0,0,0.05);
+        }
+
+        /* 包包與背帶總容器 */
+        .bag-system {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none; /* 讓容器不擋住點擊 */
+        }
+
+        /* 斜背帶線條 */
+        .strap {
+            position: absolute;
+            width: 140px;
+            height: 4px;
+            background-color: #d2b48c; /* 預設原皮色 */
+            top: 40%;
+            left: 10%;
+            transform: rotate(35deg);
+            transform-origin: left center;
+            transition: background-color 0.2s;
+        }
+
+        /* 固定在側邊的包包本體 */
+        .bag-unit {
+            position: absolute;
+            right: 5px;
+            bottom: 25px;
+            width: 65px;
+            height: 55px;
+            background-color: #f5deb3;
+            border: 2px solid #4a4a4a;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #4a4a4a;
+        }
+
+        /* 五金配件（扣環小點） */
+        .hardware {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #ffd700; /* 預設金 */
+            top: -4px;
+            left: 5px;
+            border: 1px solid #4a4a4a;
         }
     </style>
 </head>
 <body>
 
-    <!-- 左側控制面板 -->
     <div class="control-panel">
-        <h2>模擬器控制台</h2>
+        <h2>素體模擬器</h2>
         <hr style="border: 0; border-top: 1px solid #eee; margin: 0;">
         
-        <!-- 大分支選擇 -->
         <div class="control-group">
             <label for="main-category">素體類型</label>
             <select id="main-category" onchange="updateSubCategory()">
                 <option value="12分">12分娃</option>
-                <option value="棉花娃">棉花娃</option>
+                <option value="棉花娃" selected>棉花娃</option>
             </select>
         </div>
 
-        <!-- 小分支選擇 -->
         <div class="control-group">
-            <label for="sub-category">款式尺寸 (背景每格為1x1cm)</label>
+            <label for="sub-category">體型款式 (每格1x1cm)</label>
             <select id="sub-category" onchange="updateDollSize()">
-                <!-- 預設顯示 12分的選項 -->
-                <option value="GSC">GSC</option>
-                <option value="P8">P8</option>
-                <option value="新 P9">新 P9</option>
-                <option value="P10">P10</option>
+                <option value="10cm">10cm</option>
+                <option value="15cm">15cm</option>
+                <option value="20cm" selected>20cm</option>
             </select>
         </div>
 
-        <!-- 調整包包主體顏色 -->
         <div class="control-group">
-            <label>包包主體顏色</label>
-            <div class="color-btns">
-                <button class="color-btn" style="background-color: #ff4d4d;" onclick="changeBagColor('#ff4d4d')">紅色</button>
-                <button class="color-btn" style="background-color: #4da6ff;" onclick="changeBagColor('#4da6ff')">藍色</button>
-                <button class="color-btn" style="background-color: #5cd65c;" onclick="changeBagColor('#5cd65c')">綠色</button>
-            </div>
+            <label for="skin-color">素體膚色</label>
+            <select id="skin-color" onchange="changeSkinColor()">
+                <option value="普肌">普肌 (預設)</option>
+                <option value="白肌">白肌</option>
+                <option value="黑肌">黑肌</option>
+            </select>
         </div>
 
-        <!-- 調整包包細節顏色 -->
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 5px 0;">
+
         <div class="control-group">
-            <label>包包細節（口袋）顏色</label>
-            <div class="color-btns">
-                <button class="color-btn" style="background-color: #ffffff; color: #333; border: 1px solid #ccc;" onclick="changeDetailColor('#ffffff')">白色</button>
-                <button class="color-btn" style="background-color: #333333;" onclick="changeDetailColor('#333333')">黑色</button>
-                <button class="color-btn" style="background-color: #ffb31a;" onclick="changeDetailColor('#ffb31a')">黃色</button>
+            <label for="bag-style">包包款式 (側背)</label>
+            <select id="bag-style" onchange="updateBagStyle()">
+                <option value="吐司包">吐司包</option>
+                <option value="貓貓包">貓貓包</option>
+                <option value="飲料背帶">飲料背帶</option>
+            </select>
+        </div>
+
+        <div id="dynamic-options" class="dynamic-group">
+            <div class="control-group">
+                <label for="strap-color">背帶顏色</label>
+                <select id="strap-color" onchange="changeStrapColor()">
+                    <option value="原皮色">原皮色</option>
+                    <option value="深咖啡">深咖啡</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="hardware-color">五金顏色</label>
+                <select id="hardware-color" onchange="changeHardwareColor()">
+                    <option value="金">金</option>
+                    <option value="銀">銀</option>
+                </select>
             </div>
         </div>
     </div>
 
-    <!-- 右側顯示區域 -->
     <div class="display-area">
         <div class="canvas">
-            <!-- 娃娃素體 (初始尺寸設為 GSC 的比例) -->
-            <div id="doll" class="doll" style="width: 76px; height: 190px;"></div>
-            
-            <!-- 包包 -->
-            <div id="bag" class="bag">
-                <div id="bag-detail" class="bag-detail"></div>
+            <div id="doll" class="doll-container" style="width: 152px; height: 190px;">
+                <div id="doll-skin" class="doll-skin"></div>
+                <div class="doll-outline"></div>
+                
+                <div class="bag-system">
+                    <div id="strap" class="strap"></div>
+                    <div id="bag" class="bag-unit">
+                        <div id="hardware" class="hardware"></div>
+                        <span id="bag-text">吐司包</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        // 物件宣告
         const mainCategory = document.getElementById('main-category');
         const subCategory = document.getElementById('sub-category');
+        const skinColor = document.getElementById('skin-color');
         const doll = document.getElementById('doll');
+        const dollSkin = document.getElementById('doll-skin');
+        
+        const bagStyle = document.getElementById('bag-style');
         const bag = document.getElementById('bag');
-        const bagDetail = document.getElementById('bag-detail');
+        const bagText = document.getElementById('bag-text');
+        const strap = document.getElementById('strap');
+        const hardware = document.getElementById('hardware');
+        const dynamicOptions = document.getElementById('dynamic-options');
 
-        // 定義各個款式的真實比例尺寸數據 (單位：px，以 38px = 1cm 換算)
-        // 這裡的高度與寬度是依據照片比例抓的概估值，之後你可以隨時找我微調精準公分數字
+        // 數據設定 (38px = 1cm)
         const sizeData = {
-            'GSC':   { width: 76,  height: 190 }, // 矮胖一點
-            'P8':    { width: 68,  height: 205 }, // 較瘦
-            '新 P9': { width: 72,  height: 215 }, // 微高
-            'P10':   { width: 84,  height: 235 }, // 最高大
-            '10cm':  { width: 90,  height: 114 }, // 棉花娃特色：矮胖圓潤
-            '15cm':  { width: 120, height: 171 },
-            '20cm':  { width: 152, height: 228 }
+            'GSC':   { width: 76,  height: 152 },
+            'P8':    { width: 68,  height: 170 },
+            '新 P9': { width: 72,  height: 180 },
+            'P10':   { width: 84,  height: 195 },
+            '10cm':  { width: 100, height: 114 },
+            '15cm':  { width: 130, height: 160 },
+            '20cm':  { width: 152, height: 190 }
         };
 
-        // 1. 當大分支切換時，改變小分支的下拉選單內容
+        const skinColors = {
+            '普肌': '#fcd7b8',
+            '白肌': '#fff0e5',
+            '黑肌': '#8a5a44'
+        };
+
+        const strapColors = {
+            '原皮色': '#d2b48c',
+            '深咖啡': '#5c4033'
+        };
+
+        const hardwareColors = {
+            '金': '#ffd700',
+            '銀': '#c0c0c0'
+        };
+
+        // 1. 大分類切換
         function updateSubCategory() {
             const selectedMain = mainCategory.value;
-            subCategory.innerHTML = ''; // 清空舊選項
+            subCategory.innerHTML = '';
 
             if (selectedMain === '12分') {
-                const options = ['GSC', 'P8', '新 P9', 'P10'];
-                options.forEach(opt => {
-                    const el = document.createElement('option');
-                    el.value = opt;
-                    el.textContent = opt;
+                ['GSC', 'P8', '新 P9', 'P10'].forEach(opt => {
+                    let el = document.createElement('option');
+                    el.value = opt; el.textContent = opt;
                     subCategory.appendChild(el);
                 });
-            } else if (selectedMain === '棉花娃') {
-                const options = ['10cm', '15cm', '20cm'];
-                options.forEach(opt => {
-                    const el = document.createElement('option');
-                    el.value = opt;
-                    el.textContent = opt;
+            } else {
+                ['10cm', '15cm', '20cm'].forEach(opt => {
+                    let el = document.createElement('option');
+                    el.value = opt; el.textContent = opt;
                     subCategory.appendChild(el);
                 });
             }
-            // 切換大分類後，自動更新一次娃娃尺寸
             updateDollSize();
         }
 
-        // 2. 當小分支切換時，連動改變畫面上娃娃的寬高
+        // 2. 體型尺寸切換
         function updateDollSize() {
-            const selectedModel = subCategory.value;
-            const size = sizeData[selectedModel];
-            
+            const size = sizeData[subCategory.value];
             if (size) {
                 doll.style.width = size.width + 'px';
                 doll.style.height = size.height + 'px';
+                // 動態微調背帶長度以配合娃娃胖瘦
+                strap.style.width = (size.width * 0.9) + 'px';
             }
         }
 
-        // 3. 改變包包主體顏色
-        function changeBagColor(color) {
-            bag.style.backgroundColor = color;
+        // 3. 膚色變更
+        function changeSkinColor() {
+            dollSkin.style.backgroundColor = skinColors[skinColor.value];
         }
 
-        // 4. 改變包包細節顏色
-        function changeDetailColor(color) {
-            bagDetail.style.backgroundColor = color;
+        // 4. 包包款式切換連動細節選單
+        function updateBagStyle() {
+            const style = bagStyle.value;
+            bagText.textContent = style;
+
+            // 依包包款式改變外觀形狀與顏色
+            if (style === '吐司包') {
+                bag.style.borderRadius = "8px 8px 4px 4px";
+                bag.style.backgroundColor = "#f5deb3";
+                strap.style.display = "block";
+                
+                // 呈現吐司包專屬選項
+                dynamicOptions.innerHTML = `
+                    <div class="control-group">
+                        <label for="strap-color">背帶顏色</label>
+                        <select id="strap-color" onchange="changeStrapColor()">
+                            <option value="原皮色">原皮色</option>
+                            <option value="深咖啡">深咖啡</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="hardware-color">五金顏色</label>
+                        <select id="hardware-color" onchange="changeHardwareColor()">
+                            <option value="金">金</option>
+                            <option value="銀">銀</option>
+                        </select>
+                    </div>
+                `;
+            } else if (style === '貓貓包') {
+                bag.style.borderRadius = "50% 50% 40% 40%";
+                bag.style.backgroundColor = "#e6ccb2";
+                strap.style.display = "block";
+                
+                // 貓貓包可以擴充其他細節(例如貓耳或花色，這裡先保留基礎結構)
+                dynamicOptions.innerHTML = `
+                    <p style="margin:0; font-size:0.85rem; color:#888;">💡 貓貓包固定為斜背款式</p>
+                `;
+            } else if (style === '飲料背帶') {
+                bag.style.borderRadius = "4px";
+                bag.style.backgroundColor = "#ffffff";
+                strap.style.display = "block";
+                
+                dynamicOptions.innerHTML = `
+                    <p style="margin:0; font-size:0.85rem; color:#888;">💡 飲料背帶包含專屬提帶效果</p>
+                `;
+            }
+            // 重設一次背帶與五金顏色
+            changeStrapColor();
+            changeHardwareColor();
+        }
+
+        // 5. 變更背帶與五金
+        function changeStrapColor() {
+            const el = document.getElementById('strap-color');
+            if(el) strap.style.backgroundColor = strapColors[el.value];
+        }
+
+        function changeHardwareColor() {
+            const el = document.getElementById('hardware-color');
+            if(el) hardware.style.backgroundColor = hardwareColors[el.value];
         }
     </script>
 </body>
