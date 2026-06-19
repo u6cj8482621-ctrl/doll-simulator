@@ -203,3 +203,343 @@
             height: 0;
             border-left: 10px solid transparent;
             border-right: 10px solid transparent;
+            border-bottom: 12px solid #4a4a4a;
+        }
+        .bag-unit.cat-shape::before { left: 6px; }
+        .bag-unit.cat-shape::after { right: 6px; }
+
+        /* 貓貓包內部的拼接色塊層 */
+        .bag-patch {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background-color: transparent;
+            transition: all 0.2s;
+            pointer-events: none;
+        }
+
+        /* 賓士包與三花包的裁切拼色區塊 (使用 clip-path 模擬狐狸/貓咪肚色塊形狀) */
+        .bag-unit.cat-shape .bag-patch.active-patch {
+            background-color: #ffffff; /* 預設配色 */
+            clip-path: polygon(0% 100%, 100% 100%, 100% 60%, 70% 40%, 50% 70%, 30% 40%, 0% 60%);
+        }
+
+        /* 五金配件（扣環小點） */
+        .hardware {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #ffd700; 
+            top: 15px;
+            left: -5px;
+            border: 1px solid #4a4a4a;
+            z-index: 12;
+        }
+        .hardware.right {
+            left: auto;
+            right: -5px;
+        }
+
+        .bag-text-label {
+            position: absolute;
+            bottom: -22px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #333;
+            background: rgba(255,255,255,0.8);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="control-panel">
+        <h2>素體模擬器</h2>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 0;">
+        
+        <div class="control-group">
+            <label for="main-category">素體類型</label>
+            <select id="main-category" onchange="updateSubCategory()">
+                <option value="12分">12分娃</option>
+                <option value="棉花娃" selected>棉花娃</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="sub-category">體型款式 (每格1x1cm)</label>
+            <select id="sub-category" onchange="updateDollSize()">
+                <option value="10cm">10cm</option>
+                <option value="15cm">15cm</option>
+                <option value="20cm" selected>20cm</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="skin-color">素體膚色</label>
+            <select id="skin-color" onchange="changeSkinColor()">
+                <option value="普肌">普肌 (預設)</option>
+                <option value="白肌">白肌</option>
+                <option value="黑肌">黑肌</option>
+            </select>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 5px 0;">
+
+        <div class="control-group">
+            <label for="bag-style">包包款式 (側背)</label>
+            <select id="bag-style" onchange="updateBagStyle()">
+                <option value="貓貓包" selected>貓貓包</option>
+                <option value="吐司包">吐司包</option>
+                <option value="飲料背帶">飲料背帶</option>
+            </select>
+        </div>
+
+        <div id="dynamic-options" class="dynamic-group">
+            </div>
+    </div>
+
+    <div class="display-area">
+        <div class="canvas">
+            <div id="doll" class="doll-container" style="width: 152px; height: 190px;">
+                <div id="doll-skin" class="doll-skin"></div>
+                <div class="doll-outline"></div>
+                
+                <div class="bag-system">
+                    <div id="strap" class="strap"></div>
+                    <div id="bag" class="bag-unit cat-shape">
+                        <div id="hardware-l" class="hardware"></div>
+                        <div id="hardware-r" class="hardware right"></div>
+                        <div id="bag-patch" class="bag-patch"></div>
+                        <div id="bag-text" class="bag-text-label">貓貓包 (純色)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM 物件
+        const mainCategory = document.getElementById('main-category');
+        const subCategory = document.getElementById('sub-category');
+        const skinColor = document.getElementById('skin-color');
+        const doll = document.getElementById('doll');
+        const dollSkin = document.getElementById('doll-skin');
+        
+        const bagStyle = document.getElementById('bag-style');
+        const bag = document.getElementById('bag');
+        const bagPatch = document.getElementById('bag-patch');
+        const bagText = document.getElementById('bag-text');
+        const strap = document.getElementById('strap');
+        const hardwareL = document.getElementById('hardware-l');
+        const hardwareR = document.getElementById('hardware-r');
+        const dynamicOptions = document.getElementById('dynamic-options');
+
+        // 色票顏色陣列 (對應第二張圖的色系效果)
+        const paletteColors = [
+            { name: '黃色', hex: '#d4a373' },
+            { name: '綠色', hex: '#1a5f7a' },
+            { name: '紅色', hex: '#ae2012' },
+            { name: '玫瑰', hex: '#9b2226' },
+            { name: '白色', hex: '#f8f9fa' },
+            { name: '黑色', hex: '#212529' },
+            { name: '原皮', hex: '#e5ba73' }
+        ];
+
+        const sizeData = {
+            'GSC':   { width: 76,  height: 152 },
+            'P8':    { width: 68,  height: 170 },
+            '新 P9': { width: 72,  height: 180 },
+            'P10':   { width: 84,  height: 195 },
+            '10cm':  { width: 100, height: 114 },
+            '15cm':  { width: 130, height: 160 },
+            '20cm':  { width: 152, height: 190 }
+        };
+
+        // 預設樣式紀錄
+        let currentMainColor = '#d4a373';
+        let currentPatchColor = '#f8f9fa';
+
+        function updateSubCategory() {
+            const selectedMain = mainCategory.value;
+            subCategory.innerHTML = '';
+            if (selectedMain === '12分') {
+                ['GSC', 'P8', '新 P9', 'P10'].forEach(opt => {
+                    let el = document.createElement('option'); el.value = opt; el.textContent = opt;
+                    subCategory.appendChild(el);
+                });
+            } else {
+                ['10cm', '15cm', '20cm'].forEach(opt => {
+                    let el = document.createElement('option'); el.value = opt; el.textContent = opt;
+                    subCategory.appendChild(el);
+                });
+            }
+            updateDollSize();
+        }
+
+        function updateDollSize() {
+            const size = sizeData[subCategory.value];
+            if (size) {
+                doll.style.width = size.width + 'px';
+                doll.style.height = size.height + 'px';
+                strap.style.width = (size.width * 0.95) + 'px';
+            }
+        }
+
+        function changeSkinColor() {
+            const skins = { '普肌': '#fcd7b8', '白肌': '#fff0e5', '黑肌': '#8a5a44' };
+            dollSkin.style.backgroundColor = skins[skinColor.value];
+        }
+
+        // 核心：更換包包款式與動態生成選單
+        function updateBagStyle() {
+            const style = bagStyle.value;
+            
+            if (style === '貓貓包') {
+                bag.className = "bag-unit cat-shape";
+                bag.style.backgroundColor = currentMainColor;
+                hardwareL.style.display = "block";
+                hardwareR.style.display = "block";
+                strap.style.display = "block";
+                
+                // 渲染貓貓包複製品項
+                renderCatOptions();
+            } else {
+                // 吐司包與飲料提帶簡化版，聚焦於貓貓包設計
+                bag.className = "bag-unit";
+                bagPatch.className = "bag-patch";
+                bag.style.backgroundColor = "#ffd700";
+                hardwareR.style.display = "none";
+                bagText.textContent = style;
+                
+                dynamicOptions.innerHTML = `
+                    <div class="control-group">
+                        <label>背帶顏色</label>
+                        <select id="strap-color" onchange="strap.style.backgroundColor = this.value">
+                            <option value="#d2b48c">原皮色</option>
+                            <option value="#5c4033">深咖啡</option>
+                        </select>
+                    </div>
+                `;
+            }
+        }
+
+        // 渲染貓貓包專用繁複選單
+        function renderCatOptions() {
+            dynamicOptions.innerHTML = `
+                <div class="control-group">
+                    <label for="strap-color">背帶顏色</label>
+                    <select id="strap-color" onchange="updateStrapColor(this.value)">
+                        <option value="#d2b48c">原皮色</option>
+                        <option value="#5c4033">深咖啡</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="hardware-color">五金顏色</label>
+                    <select id="hardware-color" onchange="updateHardwareColor(this.value)">
+                        <option value="#ffd700">金</option>
+                        <option value="#c0c0c0">銀</option>
+                        <option value="#b87333">銅</option>
+                        <option value="#212529">黑</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="cat-type">貓咪款式</label>
+                    <select id="cat-type" onchange="handleCatTypeChange(this.value)">
+                        <option value="純色">純色</option>
+                        <option value="三花">三花</option>
+                        <option value="賓士">賓士</option>
+                        <option value="手繪">手繪</option>
+                        <option value="特殊">特殊</option>
+                    </select>
+                </div>
+                <div id="cat-color-pickers">
+                    </div>
+            `;
+            // 預設觸發一次純色色票渲染
+            handleCatTypeChange('純色');
+        }
+
+        function updateStrapColor(color) { strap.style.backgroundColor = color; }
+        function updateHardwareColor(color) { 
+            hardwareL.style.backgroundColor = color; 
+            hardwareR.style.backgroundColor = color; 
+        }
+
+        // 當切換 純色/三花/賓士 時
+        function handleCatTypeChange(type) {
+            const container = document.getElementById('cat-color-pickers');
+            bagText.textContent = `貓貓包 (${type})`;
+            
+            if (type === '三花' || type === '賓士') {
+                // 啟動圖層拼接遮色片
+                bagPatch.className = "bag-patch active-patch";
+                
+                // 產生兩個色票選區
+                container.innerHTML = `
+                    <div class="control-group" style="margin-top:10px;">
+                        <label>1. 選擇主體包包底色：</label>
+                        <div class="color-palette" id="main-palette"></div>
+                    </div>
+                    <div class="control-group" style="margin-top:10px;">
+                        <label>2. 選擇拼色皮塊顏色：</label>
+                        <div class="color-palette" id="patch-palette"></div>
+                    </div>
+                `;
+                buildPalette('main-palette', true);
+                buildPalette('patch-palette', false);
+            } else {
+                // 純色、手繪、特殊 關閉拼接層
+                bagPatch.className = "bag-patch";
+                container.innerHTML = `
+                    <div class="control-group" style="margin-top:10px;">
+                        <label>選擇包包顏色：</label>
+                        <div class="color-palette" id="main-palette"></div>
+                    </div>
+                `;
+                buildPalette('main-palette', true);
+            }
+        }
+
+        // 建立色票按鈕
+        function buildPalette(targetId, isMain) {
+            const target = document.getElementById(targetId);
+            paletteColors.forEach(color => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                swatch.style.backgroundColor = color.hex;
+                swatch.title = color.name;
+                
+                // 加上預設選取視覺
+                if(isMain && color.hex === currentMainColor) swatch.classList.add('active');
+                if(!isMain && color.hex === currentPatchColor) swatch.classList.add('active');
+
+                swatch.onclick = function() {
+                    // 清除同群組的 active
+                    target.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+                    swatch.classList.add('active');
+
+                    if(isMain) {
+                        currentMainColor = color.hex;
+                        bag.style.backgroundColor = currentMainColor;
+                    } else {
+                        currentPatchColor = color.hex;
+                        bagPatch.style.backgroundColor = currentPatchColor;
+                    }
+                };
+                target.appendChild(swatch);
+            });
+        }
+
+        // 初始化
+        window.onload = function() {
+            updateSubCategory();
+            updateBagStyle();
+        }
+    </script>
+</body>
+</html>
