@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D 娃娃背包包模擬器 (圖層完美融合版)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            display: flex;
+            height: 100vh;
+            box-sizing: border-box;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 手機版頂部工具列 */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 99;
+            align-items: center;
+            padding: 0 15px;
+            box-sizing: border-box;
+        }
+
+        .toggle-btn {
+            background-color: #ffb6c1;
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        /* 控制面板 */
+        .control-panel {
+            width: 360px;
+            min-width: 360px;
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .close-sidebar-btn {
+            display: none;
+            background-color: #ccc;
+            color: #333;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            align-self: flex-end;
+            cursor: pointer;
+        }
+
+        h2 { margin: 0 0 5px 0; font-size: 1.4rem; color: #333; }
+        .row-group { display: flex; gap: 12px; width: 100%; }
+        .row-group .control-group { flex: 1; }
+        .control-group { display: flex; flex-direction: column; gap: 6px; }
+        
+        .dynamic-group {
+            background-color: #f9f9f9;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #ffb6c1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        label { font-weight: bold; color: #555; font-size: 0.9rem; }
+        select { padding: 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.95rem; background-color: #fff; }
+
+        /* 色票樣式 */
+        .color-palette { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+        .color-swatch {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            border: 2px solid #ccc;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .color-swatch:hover { transform: scale(1.1); }
+        .color-swatch.active { border-color: #333; box-shadow: 0 0 4px rgba(0,0,0,0.3); }
+
+        /* 右側畫布區 */
+        .display-area {
+            flex: 1;
+            background-color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: auto;
+            padding: 20px;
+        }
+
+        /* 畫布固定 550x550，內部所有圖層全部 1:1 滿版絕對定位重疊，網頁絕不干涉你的圖檔原位置 */
+        .canvas {
+            position: relative;
+            width: 550px;
+            height: 550px;
+            min-width: 550px;
+            min-height: 550px;
+            border: 2px solid #ccc;
+            background-color: #fafafa;
+            background-image: 
+                linear-gradient(to right, #e8e8e8 1px, transparent 1px),
+                linear-gradient(to bottom, #e8e8e8 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .doll-stage { position: relative; width: 100%; height: 100%; }
+
+        /* 1:1 圖層完美標準定位：寬高完全死鎖 100%，起點全部 (0,0)，直接疊加 */
+        .layer-img {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        /* 頂層純黑線稿：使用正片疊底（multiply）完美與底下的顏色層融合，不擴散、不溢出 */
+        .lineart-overlay {
+            mix-blend-mode: multiply;
+            z-index: 25;
+        }
+
+        /* ==================== 🛠️ 全瀏覽器相容 高精度特效濾鏡 ==================== */
+        
+        /* 1. 五金變色濾鏡（基於原本黑線稿 cat_hardware.png 的高級色調轉換） */
+        .hw-gold   { filter: invert(34%) sepia(87%) saturate(464%) hue-rotate(5deg) brightness(110%) contrast(93%); } /* 質感金 */
+        .hw-silver { filter: invert(80%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(105%) contrast(90%); }    /* 亮銀 */
+        .hw-bronze { filter: invert(30%) sepia(40%) saturate(300%) hue-rotate(15deg) brightness(75%) contrast(85%); } /* 古銅 */
+        .hw-black  { filter: invert(15%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(60%) contrast(95%); }     /* 槍黑 */
+
+        /* 2. 表情工藝加工濾鏡（基於 cat_face_black.png 轉換） */
+        .face-emboss       { filter: opacity(0.4) contrast(0.7) brightness(1.2); mix-blend-mode: multiply; }          /* 壓印：半透明自然凹陷感 */
+        .face-foil-gold    { filter: invert(34%) sepia(87%) saturate(464%) hue-rotate(5deg) brightness(110%) contrast(93%); } /* 燙金-金 */
+        .face-foil-silver  { filter: invert(80%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(105%) contrast(90%); }    /* 燙金-銀 */
+        .face-foil-rose    { filter: invert(40%) sepia(30%) saturate(400%) hue-rotate(320deg) brightness(105%) contrast(90%); } /* 玫瑰金 */
+        .face-foil-black   { filter: invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(10%) contrast(100%); }      /* 燙金-黑 */
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; padding-top: 50px; }
+            .mobile-header { display: flex; }
+            .control-panel {
+                position: fixed; top: 0; left: 0; height: 100vh; width: 300px;
+                transform: translateX(-100%); box-shadow: 4px 0 10px rgba(0,0,0,0.2);
+            }
+            .control-panel.open { transform: translateX(0); }
+            .close-sidebar-btn { display: block; }
+            .display-area { width: 100%; height: calc(100vh - 50px); align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-header">
+        <button class="toggle-btn" onclick="toggleSidebar()">☰ 選單設定</button>
+    </div>
+
+    <div class="control-panel" id="sidebar">
+        <button class="close-sidebar-btn" onclick="toggleSidebar()">✕ 收起選單</button>
+        <h2>素體配件模擬器</h2>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 0;">
+        
+        <div class="row-group">
+            <div class="control-group">
+                <label for="main-category">素體類型</label>
+                <select id="main-category" onchange="updateSubCategory()">
+                    <option value="12分" selected>12分娃</option>
+                    <option value="棉花娃">棉花娃</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="skin-preset">快速膚色</label>
+                <select id="skin-preset" onchange="applySkinPreset()">
+                    <option value="普肌" selected>普肌</option>
+                    <option value="白肌">白肌</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label for="sub-category">體型款式</label>
+            <select id="sub-category" onchange="onDollOrBagChange()">
+                </select>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 5px 0;">
+
+        <div class="control-group">
+            <label for="bag-style">包包款式</label>
+            <select id="bag-style" onchange="onDollOrBagChange()">
+                <option value="cat" selected>萬用貓貓包</option>
+            </select>
+        </div>
+
+        <div id="dynamic-options" class="dynamic-group">
+            </div>
+    </div>
+
+    <div class="display-area">
+        <div class="canvas">
+            <div class="doll-stage">
+                <img id="doll-mask" class="layer-img" style="z-index: 1;" src="dolls/body_ob11.png" alt="娃娃素體">
+                
+                <img id="layer-main-color" class="layer-img" style="z-index:10;" src="" alt="">
+
+                <img id="layer-tuxedo-color" class="layer-img" style="z-index:11; display:none;" src="" alt="">
+
+                <img id="layer-calico" class="layer-img" style="display:none; z-index:12;" src="" alt="">
+                
+                <img id="layer-main-line" class="layer-img lineart-overlay" style="z-index:20;" src="" alt="">
+                <img id="layer-tuxedo-line" class="layer-img lineart-overlay" style="z-index:21; display:none;" src="" alt="">
+                <img id="layer-face" class="layer-img" style="z-index:22;" src="" alt="">
+                <img id="layer-hardware" class="layer-img" style="z-index:23;" src="" alt="">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const paletteColors = [
+            { name: '原皮色', hex: '#d4a373' },
+            { name: '馬鞍棕', hex: '#b57c4c' },
+            { name: '櫻花粉', hex: '#ffb6c1' },
+            { name: '經典黑', hex: '#212529' },
+            { name: '象牙白', hex: '#f8f9fa' },
+            { name: '復古紅', hex: '#ae2012' },
+            { name: '午夜藍', hex: '#1a5f7a' }
+        ];
+
+        let currentMainColor = '#d4a373';
+        let currentTuxedoColor = '#f8f9fa';
+        let currentHardware = 'hw-gold';
+        let currentExpression = 'face-emboss'; 
+        let currentCatPattern = 'pure';   
+
+        const sidebar = document.getElementById('sidebar');
+        const mainCategory = document.getElementById('main-category');
+        const subCategory = document.getElementById('sub-category');
+        const skinPreset = document.getElementById('skin-preset');
+        const dollMask = document.getElementById('doll-mask');
+
+        function toggleSidebar() { sidebar.classList.toggle('open'); }
+
+        function updateSubCategory() {
+            const selectedMain = mainCategory.value;
+            subCategory.innerHTML = '';
+            const opts = selectedMain === '12分' ? ['OB11', '黏土娃', '新 P9'] : ['10cm', '20cm'];
+            opts.forEach(opt => {
+                let el = document.createElement('option'); el.value = opt; el.textContent = opt;
+                subCategory.appendChild(el);
+            });
+            onDollOrBagChange();
+        }
+
+        function applySkinPreset() {
+            // 素體膚色快速切換
+            if(skinPreset.value === '白肌') {
+                dollMask.style.filter = "brightness(1.1) sepia(0.1)";
+            } else {
+                dollMask.style.filter = "none";
+            }
+        }
+
+        function onDollOrBagChange() {
+            const imageMapping = {
+                'OB11': 'dolls/body_ob11.png',
+                '黏土娃': 'dolls/body_Nendoroid_Doll.png',
+                '新 P9': 'dolls/body_p9.png',
+                '10cm': 'dolls/body_10cm.png',
+                '20cm': 'dolls/body_20cm.png'
+            };
+            dollMask.src = imageMapping[subCategory.value];
+
+            renderControlPanel();
+            refreshLayers();
+        }
+
+        function renderControlPanel() {
+            const panel = document.getElementById('dynamic-options');
+            panel.innerHTML = `
+                <div class="control-group">
+                    <label>花色款式</label>
+                    <select id="cat-pattern-select" onchange="currentCatPattern=this.value; onDollOrBagChange();">
+                        <option value="pure" ${currentCatPattern==='pure'?'selected':''}>純色款</option>
+                        <option value="tuxedo" ${currentCatPattern==='tuxedo'?'selected':''}>賓士款</option>
+                        <option value="calico" ${currentCatPattern==='calico'?'selected':''}>固定色-三花款</option>
+                    </select>
+                </div>
+                <div id="color-pickers-zone"></div>
+                <div class="control-group">
+                    <label>五金顏色</label>
+                    <select onchange="currentHardware=this.value; refreshLayers();">
+                        <option value="hw-gold" ${currentHardware==='hw-gold'?'selected':''}>純亮金</option>
+                        <option value="hw-silver" ${currentHardware==='hw-silver'?'selected':''}>亮銀色</option>
+                        <option value="hw-bronze" ${currentHardware==='hw-bronze'?'selected':''}>復古古銅</option>
+                        <option value="hw-black" ${currentHardware==='hw-black'?'selected':''}>質感槍黑</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>燙金/壓印加工</label>
+                    <select onchange="currentExpression=this.value; refreshLayers();">
+                        <option value="face-emboss" ${currentExpression==='face-emboss'?'selected':''}>凹凸壓印</option>
+                        <option value="face-foil-gold" ${currentExpression==='face-foil-gold'?'selected':''}>經典燙金</option>
+                        <option value="face-foil-silver" ${currentExpression==='face-foil-silver'?'selected':''}>極光燙銀</option>
+                        <option value="face-foil-rose" ${currentExpression==='face-foil-rose'?'selected':''}>玫瑰金</option>
+                        <option value="face-foil-black" ${currentExpression==='face-foil-black'?'selected':''}>個性黑金</option>
+                    </select>
+                </div>
+            `;
+
+            const zone = document.getElementById('color-pickers-zone');
+            if (currentCatPattern === 'pure') {
+                zone.innerHTML = `<div class="control-group"><label>包包主體顏色</label><div class="color-palette" id="main-pal"></div></div>`;
+                buildPalette('main-pal', 'main');
+            } else if (currentCatPattern === 'tuxedo') {
+                zone.innerHTML = `
+                    <div class="control-group"><label>1. 包包底色</label><div class="color-palette" id="main-pal"></div></div>
+                    <div class="control-group" style="margin-top:5px;"><label>2. 賓士區塊顏色</label><div class="color-palette" id="tux-pal"></div></div>
+                `;
+                buildPalette('main-pal', 'main');
+                buildPalette('tux-pal', 'tuxedo');
+            }
+        }
+
+        function buildPalette(targetId, type) {
+            const target = document.getElementById(targetId);
+            if(!target) return;
+            paletteColors.forEach(color => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                swatch.style.backgroundColor = color.hex;
+                
+                if(type === 'main' && color.hex === currentMainColor) swatch.classList.add('active');
+                if(type === 'tuxedo' && color.hex === currentTuxedoColor) swatch.classList.add('active');
+
+                swatch.onclick = function() {
+                    target.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+                    swatch.classList.add('active');
+                    if(type === 'main') { currentMainColor = color.hex; }
+                    if(type === 'tuxedo') { currentTuxedoColor = color.hex; }
+                    refreshLayers();
+                };
+                target.appendChild(swatch);
+            });
+        }
+
+        // 精準將色票 hex 轉換為完美的純色填充濾鏡
+        function hexToFilter(hex) {
+            return `drop-shadow(0px 0px 0px ${hex}) drop-shadow(0px 0px 0px ${hex}) drop-shadow(0px 0px 0px ${hex}) brightness(1.0) contrast(1.0)`;
+        }
+
+        function refreshLayers() {
+            const imgPath = 'bags/cat/';
+            
+            // 著色底層 DOM
+            const lMainColor = document.getElementById('layer-main-color');
+            const lTuxColor = document.getElementById('layer-tuxedo-color');
+            const lCalico = document.getElementById('layer-calico');
+            
+            // 頂層黑色線稿 DOM
+            const lMainLine = document.getElementById('layer-main-line');
+            const lTuxLine = document.getElementById('layer-tuxedo-line');
+            const lFace = document.getElementById('layer-face');
+            const lHardware = document.getElementById('layer-hardware');
+
+            if (currentCatPattern === 'calico') {
+                lCalico.style.display = 'block';
+                lCalico.src = `${imgPath}cat_calico.png`;
+                
+                lMainColor.style.display = 'none';
+                lTuxColor.style.display = 'none';
+                lMainLine.style.display = 'none';
+                lTuxLine.style.display = 'none';
+            } else {
+                lCalico.style.display = 'none';
+                
+                // 1. 渲染主體：底層用 filter 刷上飽和的實色，頂層蓋上原本的純黑去背線稿
+                lMainColor.style.display = 'block';
+                lMainColor.src = `${imgPath}cat_main.png`;
+                lMainColor.style.filter = hexToFilter(currentMainColor);
+
+                lMainLine.style.display = 'block';
+                lMainLine.src = `${imgPath}cat_main.png`;
+
+                // 2. 渲染賓士區塊
+                if (currentCatPattern === 'tuxedo') {
+                    lTuxColor.style.display = 'block';
+                    lTuxColor.src = `${imgPath}cat_patch_tuxedo.png`;
+                    lTuxColor.style.filter = hexToFilter(currentTuxedoColor);
+
+                    lTuxLine.style.display = 'block';
+                    lTuxLine.src = `${imgPath}cat_patch_tuxedo.png`;
+                } else {
+                    lTuxColor.style.display = 'none';
+                    lTuxLine.style.display = 'none';
+                }
+            }
+
+            // 3. 表情加工變色（利用覆蓋全網頁支援的精準反轉色矩陣）
+            lFace.src = `${imgPath}cat_face_black.png`;
+            lFace.className = `layer-img ${currentExpression}`;
+
+            // 4. 五金加工變色（利用覆蓋全網頁支援的精準反轉色矩陣）
+            lHardware.src = `${imgPath}cat_hardware.png`;
+            lHardware.className = `layer-img ${currentHardware}`;
+        }
+
+        window.onload = function() {
+            updateSubCategory();
+            applySkinPreset();
+        }
+    </script>
+</body>
+</html>
