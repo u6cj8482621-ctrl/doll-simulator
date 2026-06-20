@@ -87,11 +87,6 @@
 
         label { font-weight: bold; color: #555; font-size: 0.9rem; }
         select { padding: 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.95rem; background-color: #fff; }
-        input[type="range"] { width: 100%; accent-color: #ff8fa3; }
-        .range-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
-        .range-value { font-size: 0.82rem; color: #777; font-variant-numeric: tabular-nums; white-space: nowrap; }
-        .calibration-note { margin: 0; color: #777; font-size: 0.82rem; line-height: 1.45; }
-
         /* 色票樣式 */
         .color-palette { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
         .color-swatch {
@@ -373,11 +368,6 @@
                 </div>
                 <div id="color-pickers-zone"></div>
                 <hr style="border: 0; border-top: 1px solid #e6e6e6; margin: 2px 0;">
-                <p class="calibration-note">尺寸校準：包包以公分換算顯示，X/Y 是包包中心點，從素體可視左上角起算。包包大小依素體可視高度換算，會比用整張畫布更接近實際比例。</p>
-                ${renderRangeControl('xCm', '包包中心 X', 0, 20, 0.1, 'cm')}
-                ${renderRangeControl('yCm', '包包中心 Y', 0, 20, 0.1, 'cm')}
-                ${renderRangeControl('sizeCm', '包包寬度', 1, 6, 0.1, 'cm')}
-                ${renderRangeControl('rotationDeg', '包包角度', -45, 45, 1, '°')}
                 <div class="control-group">
                     <label>五金顏色</label>
                     <select onchange="currentHardware=this.value; refreshLayers();">
