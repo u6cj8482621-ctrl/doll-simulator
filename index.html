@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2D 娃娃背包包模擬器 (1:1 剪裁遮色片版)</title>
+    <title>2D 娃娃背包包模擬器 (圖層完美融合版)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -112,7 +112,7 @@
             padding: 20px;
         }
 
-        /* 畫布固定 550x550，內部所有圖層也必須完全 550x550，不允許網頁自己縮放或置中 */
+        /* 畫布固定 550x550，內部所有圖層全部 1:1 滿版絕對定位重疊，網頁絕不干涉你的圖檔原位置 */
         .canvas {
             position: relative;
             width: 550px;
@@ -124,63 +124,41 @@
             background-image: 
                 linear-gradient(to right, #e8e8e8 1px, transparent 1px),
                 linear-gradient(to bottom, #e8e8e8 1px, transparent 1px);
-            background-size: 118px 118px;
+            background-size: 20px 20px;
         }
 
         .doll-stage { position: relative; width: 100%; height: 100%; }
 
-        /* 娃娃底色層 */
-        .doll-skin-layer {
-            position: absolute;
-            width: 550px;
-            height: 550px;
-            top: 0;
-            left: 0;
-            background-color: #e3d2b9;
-            z-index: 1;
-        }
-        
-        /* 1:1 圖層標準定位：寬高寫死 550px，起點全部靠左上 (0,0)，不進行任何拉伸 */
+        /* 1:1 圖層完美標準定位：寬高完全死鎖 100%，起點全部 (0,0)，直接疊加 */
         .layer-img {
             position: absolute;
-            width: 550px;
-            height: 550px;
-            top: 0;
-            left: 0;
-            object-fit: fill;
-            pointer-events: none;
-        }
-
-        /* ==================== 🛠️ 核心：剪裁遮色片技術容器 ==================== */
-        /* 利用線稿 PNG 當作 Mask 遮罩，容器內填入什麼底色，就會被裁剪成什麼形狀 */
-        .mask-container {
-            position: absolute;
-            width: 550px;
-            height: 550px;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            /* 預設遮罩混合模式 */
-            -webkit-mask-size: 550px 550px;
-            mask-size: 550px 550px;
-            -webkit-mask-repeat: no-repeat;
-            mask-repeat: no-repeat;
-            -webkit-mask-position: 0px 0px;
-            mask-position: 0px 0px;
-        }
-
-        /* 遮色片內部的顏色填充層（可任意更換 background-color） */
-        .color-fill-layer {
             width: 100%;
             height: 100%;
-            transition: background-color 0.1s;
+            top: 0;
+            left: 0;
+            pointer-events: none;
         }
 
-        /* 壓印工藝：模擬皮革凹陷陰影 */
-        .emboss-blend {
+        /* 頂層純黑線稿：使用正片疊底（multiply）完美與底下的顏色層融合，不擴散、不溢出 */
+        .lineart-overlay {
             mix-blend-mode: multiply;
-            opacity: 0.35;
+            z-index: 25;
         }
+
+        /* ==================== 🛠️ 全瀏覽器相容 高精度特效濾鏡 ==================== */
+        
+        /* 1. 五金變色濾鏡（基於原本黑線稿 cat_hardware.png 的高級色調轉換） */
+        .hw-gold   { filter: invert(34%) sepia(87%) saturate(464%) hue-rotate(5deg) brightness(110%) contrast(93%); } /* 質感金 */
+        .hw-silver { filter: invert(80%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(105%) contrast(90%); }    /* 亮銀 */
+        .hw-bronze { filter: invert(30%) sepia(40%) saturate(300%) hue-rotate(15deg) brightness(75%) contrast(85%); } /* 古銅 */
+        .hw-black  { filter: invert(15%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(60%) contrast(95%); }     /* 槍黑 */
+
+        /* 2. 表情工藝加工濾鏡（基於 cat_face_black.png 轉換） */
+        .face-emboss       { filter: opacity(0.4) contrast(0.7) brightness(1.2); mix-blend-mode: multiply; }          /* 壓印：半透明自然凹陷感 */
+        .face-foil-gold    { filter: invert(34%) sepia(87%) saturate(464%) hue-rotate(5deg) brightness(110%) contrast(93%); } /* 燙金-金 */
+        .face-foil-silver  { filter: invert(80%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(105%) contrast(90%); }    /* 燙金-銀 */
+        .face-foil-rose    { filter: invert(40%) sepia(30%) saturate(400%) hue-rotate(320deg) brightness(105%) contrast(90%); } /* 玫瑰金 */
+        .face-foil-black   { filter: invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(10%) contrast(100%); }      /* 燙金-黑 */
 
         @media (max-width: 768px) {
             body { flex-direction: column; padding-top: 50px; }
@@ -245,26 +223,18 @@
     <div class="display-area">
         <div class="canvas">
             <div class="doll-stage">
-                <div id="doll-skin" class="doll-skin-layer"></div>
-                <img id="doll-mask" class="layer-img" src="dolls/body_ob11.png" alt="娃娃素體">
+                <img id="doll-mask" class="layer-img" style="z-index: 1;" src="dolls/body_ob11.png" alt="娃娃素體">
                 
-                <div id="mask-main-container" class="mask-container" style="z-index:10;">
-                    <div id="fill-main-color" class="color-fill-layer"></div>
-                </div>
+                <img id="layer-main-color" class="layer-img" style="z-index:10;" src="" alt="">
 
-                <div id="mask-tux-container" class="mask-container" style="z-index:11; display:none;">
-                    <div id="fill-tux-color" class="color-fill-layer"></div>
-                </div>
+                <img id="layer-tuxedo-color" class="layer-img" style="z-index:11; display:none;" src="" alt="">
 
                 <img id="layer-calico" class="layer-img" style="display:none; z-index:12;" src="" alt="">
                 
-                <div id="mask-face-container" class="mask-container" style="z-index:13;">
-                    <div id="fill-face-color" class="color-fill-layer"></div>
-                </div>
-
-                <div id="mask-hardware-container" class="mask-container" style="z-index:14;">
-                    <div id="fill-hardware-color" class="color-fill-layer"></div>
-                </div>
+                <img id="layer-main-line" class="layer-img lineart-overlay" style="z-index:20;" src="" alt="">
+                <img id="layer-tuxedo-line" class="layer-img lineart-overlay" style="z-index:21; display:none;" src="" alt="">
+                <img id="layer-face" class="layer-img" style="z-index:22;" src="" alt="">
+                <img id="layer-hardware" class="layer-img" style="z-index:23;" src="" alt="">
             </div>
         </div>
     </div>
@@ -280,33 +250,16 @@
             { name: '午夜藍', hex: '#1a5f7a' }
         ];
 
-        // 精準對應色彩對照表
-        const hardwareColors = {
-            'gold': '#ffd700',   // 金
-            'silver': '#e0e0e0', // 銀
-            'bronze': '#b8860b', // 古銅 (暗金)
-            'black': '#222222'   // 槍黑
-        };
-
-        const foilColors = {
-            'emboss': '#554433',      // 壓印底色 (配合混合模式)
-            'foil-gold': '#ffd700',   // 燙金-金
-            'foil-silver': '#e0e0e0', // 燙金-銀
-            'foil-rose': '#b76e79',   // 燙金-玫瑰金
-            'foil-black': '#111111'   // 燙金-黑
-        };
-
         let currentMainColor = '#d4a373';
         let currentTuxedoColor = '#f8f9fa';
-        let currentHardware = 'gold';
-        let currentExpression = 'emboss'; 
+        let currentHardware = 'hw-gold';
+        let currentExpression = 'face-emboss'; 
         let currentCatPattern = 'pure';   
 
         const sidebar = document.getElementById('sidebar');
         const mainCategory = document.getElementById('main-category');
         const subCategory = document.getElementById('sub-category');
         const skinPreset = document.getElementById('skin-preset');
-        const dollSkin = document.getElementById('doll-skin');
         const dollMask = document.getElementById('doll-mask');
 
         function toggleSidebar() { sidebar.classList.toggle('open'); }
@@ -323,7 +276,12 @@
         }
 
         function applySkinPreset() {
-            dollSkin.style.backgroundColor = skinPreset.value === '普肌' ? '#e3d2b9' : '#e5dbcc';
+            // 素體膚色快速切換
+            if(skinPreset.value === '白肌') {
+                dollMask.style.filter = "brightness(1.1) sepia(0.1)";
+            } else {
+                dollMask.style.filter = "none";
+            }
         }
 
         function onDollOrBagChange() {
@@ -355,20 +313,20 @@
                 <div class="control-group">
                     <label>五金顏色</label>
                     <select onchange="currentHardware=this.value; refreshLayers();">
-                        <option value="gold" ${currentHardware==='gold'?'selected':''}>金</option>
-                        <option value="silver" ${currentHardware==='silver'?'selected':''}>銀</option>
-                        <option value="bronze" ${currentHardware==='bronze'?'selected':''}>古銅</option>
-                        <option value="black" ${currentHardware==='black'?'selected':''}>槍黑</option>
+                        <option value="hw-gold" ${currentHardware==='hw-gold'?'selected':''}>純亮金</option>
+                        <option value="hw-silver" ${currentHardware==='hw-silver'?'selected':''}>亮銀色</option>
+                        <option value="hw-bronze" ${currentHardware==='hw-bronze'?'selected':''}>復古古銅</option>
+                        <option value="hw-black" ${currentHardware==='hw-black'?'selected':''}>質感槍黑</option>
                     </select>
                 </div>
                 <div class="control-group">
                     <label>燙金/壓印加工</label>
                     <select onchange="currentExpression=this.value; refreshLayers();">
-                        <option value="emboss" ${currentExpression==='emboss'?'selected':''}>壓印</option>
-                        <option value="foil-gold" ${currentExpression==='foil-gold'?'selected':''}>燙金-金</option>
-                        <option value="foil-silver" ${currentExpression==='foil-silver'?'selected':''}>燙金-銀</option>
-                        <option value="foil-rose" ${currentExpression==='foil-rose'?'selected':''}>燙金-玫瑰金</option>
-                        <option value="foil-black" ${currentExpression==='foil-black'?'selected':''}>燙金-黑</option>
+                        <option value="face-emboss" ${currentExpression==='face-emboss'?'selected':''}>凹凸壓印</option>
+                        <option value="face-foil-gold" ${currentExpression==='face-foil-gold'?'selected':''}>經典燙金</option>
+                        <option value="face-foil-silver" ${currentExpression==='face-foil-silver'?'selected':''}>極光燙銀</option>
+                        <option value="face-foil-rose" ${currentExpression==='face-foil-rose'?'selected':''}>玫瑰金</option>
+                        <option value="face-foil-black" ${currentExpression==='face-foil-black'?'selected':''}>個性黑金</option>
                     </select>
                 </div>
             `;
@@ -409,63 +367,65 @@
             });
         }
 
-        // ==================== 🎛️ 核心重疊渲染與剪裁遮色片邏輯 ====================
+        // 精準將色票 hex 轉換為完美的純色填充濾鏡
+        function hexToFilter(hex) {
+            return `drop-shadow(0px 0px 0px ${hex}) drop-shadow(0px 0px 0px ${hex}) drop-shadow(0px 0px 0px ${hex}) brightness(1.0) contrast(1.0)`;
+        }
+
         function refreshLayers() {
             const imgPath = 'bags/cat/';
             
-            // 獲取 DOM 容器
-            const mMainCont = document.getElementById('mask-main-container');
-            const fMainColor = document.getElementById('fill-main-color');
-            const mTuxCont = document.getElementById('mask-tux-container');
-            const fTuxColor = document.getElementById('fill-tux-color');
+            // 著色底層 DOM
+            const lMainColor = document.getElementById('layer-main-color');
+            const lTuxColor = document.getElementById('layer-tuxedo-color');
             const lCalico = document.getElementById('layer-calico');
             
-            const mFaceCont = document.getElementById('mask-face-container');
-            const fFaceColor = document.getElementById('fill-face-color');
-            const mHwCont = document.getElementById('mask-hardware-container');
-            const fHwColor = document.getElementById('fill-hardware-color');
+            // 頂層黑色線稿 DOM
+            const lMainLine = document.getElementById('layer-main-line');
+            const lTuxLine = document.getElementById('layer-tuxedo-line');
+            const lFace = document.getElementById('layer-face');
+            const lHardware = document.getElementById('layer-hardware');
 
-            // 1. 處理主體、賓士與三花
             if (currentCatPattern === 'calico') {
                 lCalico.style.display = 'block';
                 lCalico.src = `${imgPath}cat_calico.png`;
-                mMainCont.style.display = 'none';
-                mTuxCont.style.display = 'none';
+                
+                lMainColor.style.display = 'none';
+                lTuxColor.style.display = 'none';
+                lMainLine.style.display = 'none';
+                lTuxLine.style.display = 'none';
             } else {
                 lCalico.style.display = 'none';
                 
-                // 【核心遮罩設定】把線稿圖檔直接指派為 CSS Mask
-                mMainCont.style.display = 'block';
-                mMainCont.style.webkitMaskImage = `url('${imgPath}cat_main.png')`;
-                mMainCont.style.maskImage = `url('${imgPath}cat_main.png')`;
-                fMainColor.style.backgroundColor = currentMainColor; // 填色
+                // 1. 渲染主體：底層用 filter 刷上飽和的實色，頂層蓋上原本的純黑去背線稿
+                lMainColor.style.display = 'block';
+                lMainColor.src = `${imgPath}cat_main.png`;
+                lMainColor.style.filter = hexToFilter(currentMainColor);
 
+                lMainLine.style.display = 'block';
+                lMainLine.src = `${imgPath}cat_main.png`;
+
+                // 2. 渲染賓士區塊
                 if (currentCatPattern === 'tuxedo') {
-                    mTuxCont.style.display = 'block';
-                    mTuxCont.style.webkitMaskImage = `url('${imgPath}cat_patch_tuxedo.png')`;
-                    mTuxCont.style.maskImage = `url('${imgPath}cat_patch_tuxedo.png')`;
-                    fTuxColor.style.backgroundColor = currentTuxedoColor; // 填色
+                    lTuxColor.style.display = 'block';
+                    lTuxColor.src = `${imgPath}cat_patch_tuxedo.png`;
+                    lTuxColor.style.filter = hexToFilter(currentTuxedoColor);
+
+                    lTuxLine.style.display = 'block';
+                    lTuxLine.src = `${imgPath}cat_patch_tuxedo.png`;
                 } else {
-                    mTuxCont.style.display = 'none';
+                    lTuxColor.style.display = 'none';
+                    lTuxLine.style.display = 'none';
                 }
             }
 
-            // 2. 表情工藝【剪裁遮色片連動】
-            mFaceCont.style.webkitMaskImage = `url('${imgPath}cat_face_black.png')`;
-            mFaceCont.style.maskImage = `url('${imgPath}cat_face_black.png')`;
-            fFaceColor.style.backgroundColor = foilColors[currentExpression];
-            
-            // 如果是壓印加工，套用正片疊底混合模式模擬皮革凹陷陰影
-            if (currentExpression === 'emboss') {
-                mFaceCont.className = "mask-container emboss-blend";
-            } else {
-                mFaceCont.className = "mask-container";
-            }
+            // 3. 表情加工變色（利用覆蓋全網頁支援的精準反轉色矩陣）
+            lFace.src = `${imgPath}cat_face_black.png`;
+            lFace.className = `layer-img ${currentExpression}`;
 
-            // 3. 五金顏色【剪裁遮色片連動】
-            mHwCont.style.webkitMaskImage = `url('${imgPath}cat_hardware.png')`;
-            mHwCont.style.maskImage = `url('${imgPath}cat_hardware.png')`;
-            fHwColor.style.backgroundColor = hardwareColors[currentHardware];
+            // 4. 五金加工變色（利用覆蓋全網頁支援的精準反轉色矩陣）
+            lHardware.src = `${imgPath}cat_hardware.png`;
+            lHardware.className = `layer-img ${currentHardware}`;
         }
 
         window.onload = function() {
