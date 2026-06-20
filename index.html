@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2D 娃娃背包包模擬器 V2</title>
+    <title>2D 娃娃背包包模擬器 V2.1</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -123,7 +123,7 @@
             background-image: 
                 linear-gradient(to right, #e8e8e8 1px, transparent 1px),
                 linear-gradient(to bottom, #e8e8e8 1px, transparent 1px);
-            background-size: 118px 118px; /* 1*1CM 基準 */
+            background-size: 118px 118px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -163,14 +163,14 @@
         /* 包包主容器 */
         .bag-container {
             position: absolute;
-            width: 105px;  /* 對應高精細包包比例 */
-            height: 90px;
+            width: 120px;  
+            height: 110px;
             z-index: 10;
             pointer-events: none;
             transition: left 0.2s, top 0.2s;
         }
 
-        /* 包包各圖層通用樣式 */
+        /* 完美去背核心：利用 CSS mask 技術，只保留圖片白色內部的形狀 */
         .bag-layer {
             position: absolute;
             width: 100%;
@@ -182,15 +182,15 @@
             pointer-events: none;
         }
 
-        /* 顏色渲染模式：利用 mix-blend-mode 讓白色區塊染上底色並保留黑線 */
-        .layer-render {
-            mix-blend-mode: multiply;
+        /* 高級去背上色混色模式 */
+        .layer-colored {
+            mix-blend-mode: multiply; /* 完美保留線稿並融合色彩 */
         }
 
         /* 壓印工藝特效 */
         .face-emboss-effect {
             mix-blend-mode: multiply;
-            opacity: 0.25; /* 讓黑色線條隱隱約約融入皮色，形成精緻的凹陷烙印感 */
+            opacity: 0.25; 
         }
 
         /* 五金專屬進階金屬濾鏡 */
@@ -215,16 +215,18 @@
 </head>
 <body>
 
+    <!-- SVG 智慧上色與金屬濾鏡 -->
     <svg style="position: absolute; width: 0; height: 0;">
         <defs>
+            <!-- 金色濾鏡 -->
             <filter id="gold-filter">
                 <feComponentTransfer>
                     <feFuncR type="linear" slope="0" replace="1"/>
                     <feFuncG type="linear" slope="0" replace="0.75"/>
                     <feFuncB type="linear" slope="0" replace="0.2"/>
                 </feComponentTransfer>
-                <feComponentTransfer><feFuncA type="linear" slope="1"/></feComponentTransfer>
             </filter>
+            <!-- 銀色濾鏡 -->
             <filter id="silver-filter">
                 <feComponentTransfer>
                     <feFuncR type="linear" slope="0" replace="0.75"/>
@@ -232,6 +234,7 @@
                     <feFuncB type="linear" slope="0" replace="0.78"/>
                 </feComponentTransfer>
             </filter>
+            <!-- 古銅色濾鏡 -->
             <filter id="bronze-filter">
                 <feComponentTransfer>
                     <feFuncR type="linear" slope="0" replace="0.6"/>
@@ -239,6 +242,7 @@
                     <feFuncB type="linear" slope="0" replace="0.25"/>
                 </feComponentTransfer>
             </filter>
+            <!-- 玫瑰金濾鏡 -->
             <filter id="rose-gold-filter">
                 <feComponentTransfer>
                     <feFuncR type="linear" slope="0" replace="0.85"/>
@@ -278,7 +282,8 @@
         <div class="control-group">
             <label for="sub-category">體型款式</label>
             <select id="sub-category" onchange="onDollOrBagChange()">
-                </select>
+                <!-- 動態生成 -->
+            </select>
         </div>
 
         <hr style="border: 0; border-top: 1px solid #eee; margin: 5px 0;">
@@ -291,7 +296,8 @@
         </div>
 
         <div id="dynamic-options" class="dynamic-group">
-            </div>
+            <!-- 動態改色面板 -->
+        </div>
     </div>
 
     <div class="display-area">
@@ -300,24 +306,29 @@
                 <div id="doll-skin" class="doll-skin-layer"></div>
                 <img id="doll-mask" class="doll-mask-img" src="dolls/body_ob11.png" alt="娃娃素體">
                 
+                <!-- 獨立背帶 -->
                 <div id="dynamic-strap" class="dynamic-strap"></div>
 
+                <!-- 智慧去背多圖層包包系統 -->
                 <div id="bag-container" class="bag-container">
-                    <div id="layer-calico" class="bag-layer" style="display:none;"></div>
-                    <div id="layer-main-bg" class="bag-layer" style="background-color:transparent;"></div>
-                    <div id="layer-main" class="bag-layer layer-render"></div>
-                    <div id="layer-tuxedo-bg" class="bag-layer" style="background-color:transparent; display:none;"></div>
-                    <div id="layer-tuxedo" class="bag-layer layer-render" style="display:none;"></div>
-                    <div id="layer-face" class="bag-layer"></div>
-                    <div id="layer-hardware" class="bag-layer"></div>
+                    <!-- 三花層：不染色，直接呈現 -->
+                    <img id="layer-calico" class="bag-layer" style="display:none;" src="" alt="">
+                    
+                    <!-- 主體染色層：利用 CSS mix-blend-mode 直接進行色彩合成 -->
+                    <img id="layer-main" class="bag-layer layer-colored" src="" alt="">
+                    
+                    <!-- 賓士染色層 -->
+                    <img id="layer-tuxedo" class="bag-layer layer-colored" style="display:none;" src="" alt="">
+                    
+                    <!-- 表情與五金層 -->
+                    <img id="layer-face" class="bag-layer" src="" alt="">
+                    <img id="layer-hardware" class="bag-layer" src="" alt="">
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // 1. 各素體與包包的「智慧定位對照表」
-        // 包含包包在畫布上的中心點(x, y)，以及背帶起點(從肩膀拉到包包)
         const positionConfig = {
             'OB11':           { bagX: 350, bagY: 340, strapStartX: 235, strapStartY: 205 },
             '黏土娃':         { bagX: 345, bagY: 330, strapStartX: 238, strapStartY: 215 },
@@ -336,13 +347,12 @@
             { name: '午夜藍', hex: '#1a5f7a' }
         ];
 
-        // 狀態管理
         let currentMainColor = '#d4a373';
         let currentTuxedoColor = '#f8f9fa';
         let currentStrapColor = '#b57c4c';
         let currentHardware = 'hw-gold';
-        let currentExpression = 'print'; // print(一般印刷) 或 emboss(純壓印)
-        let currentCatPattern = 'pure';   // pure, tuxedo, calico
+        let currentExpression = 'print'; 
+        let currentCatPattern = 'pure';   
 
         const sidebar = document.getElementById('sidebar');
         const mainCategory = document.getElementById('main-category');
@@ -370,9 +380,7 @@
             dollSkin.style.backgroundColor = skinPreset.value === '普肌' ? '#e3d2b9' : '#e5dbcc';
         }
 
-        // 核心調度：當換素體、換包包款式、或改工藝選項時，重新計算座標與圖層
         function onDollOrBagChange() {
-            // A. 更新素體底圖
             const imageMapping = {
                 'OB11': 'dolls/body_ob11.png',
                 '黏土娃': 'dolls/body_Nendoroid_Doll.png',
@@ -382,13 +390,8 @@
             };
             dollMask.src = imageMapping[subCategory.value];
 
-            // B. 重新渲染右側控制面板
             renderControlPanel();
-
-            // C. 智慧定位刷新
             refreshPositions();
-
-            // D. 刷新圖層圖片與顏色
             refreshLayers();
         }
 
@@ -438,7 +441,6 @@
                 zone.innerHTML = `<p style="font-size:0.85rem; color:#888; margin:5px 0;">💡 三花款為固定設計配色，已為您鎖定色彩面板。</p>`;
             }
 
-            // 背帶改色追加
             const strapGroup = document.createElement('div');
             strapGroup.className = 'control-group';
             strapGroup.innerHTML = `<label>皮背帶顏色</label><div class="color-palette" id="strap-pal"></div>`;
@@ -469,20 +471,17 @@
             });
         }
 
-        // 動態計算背帶的長度與旋轉角度，完美連線到肩膀
         function refreshPositions() {
             const config = positionConfig[subCategory.value] || positionConfig['OB11'];
             
-            // 定位包包主容器 (扣除包包一半寬高，以中心點對齊)
-            const bX = config.bagX - 52;
-            const bY = config.bagY - 45;
+            const bX = config.bagX - 60;
+            const bY = config.bagY - 55;
             bagContainer.style.left = bX + 'px';
             bagContainer.style.top = bY + 'px';
 
-            // 背帶動態三角函數計算
             const sX = config.strapStartX;
             const sY = config.strapStartY;
-            const targetX = config.bagX - 35; // 連接到包包左側掛耳附近
+            const targetX = config.bagX - 35; 
             const targetY = config.bagY - 15;
 
             const deltaX = targetX - sX;
@@ -496,58 +495,53 @@
             dynamicStrap.style.transform = `rotate(${angle}deg)`;
         }
 
-        // 圖層顯隱與濾鏡上色核心
+        // 徹底修正：改用 <img> 直接更換樣式，並用高階色彩濾鏡或背景合成避免外圍正方形
         function refreshLayers() {
             const imgPath = 'bags/cat/';
             
             const lCalico = document.getElementById('layer-calico');
-            const lMainBg = document.getElementById('layer-main-bg');
             const lMain = document.getElementById('layer-main');
-            const lTuxBg = document.getElementById('layer-tux-bg');
-            const lTux = document.getElementById('layer-tux');
+            const lTuxedo = document.getElementById('layer-tuxedo');
             const lFace = document.getElementById('layer-face');
             const lHardware = document.getElementById('layer-hardware');
 
-            // 套用背帶色
+            // 1. 套用背帶色
             dynamicStrap.style.backgroundColor = currentStrapColor;
 
             if (currentCatPattern === 'calico') {
-                // 三花模式：開啟固定配色圖，隱藏主體和賓士層
                 lCalico.style.display = 'block';
-                lCalico.style.backgroundImage = `url('${imgPath}cat_calico.png')`;
-                lMainBg.style.display = 'none';
+                lCalico.src = `${imgPath}cat_calico.png`;
                 lMain.style.display = 'none';
-                lTuxBg.style.display = 'none';
-                lTux.style.display = 'none';
+                lTuxedo.style.display = 'none';
             } else {
-                // 純色與賓士模式
                 lCalico.style.display = 'none';
+                
+                // 核心去背精準染色：利用 drop-shadow 濾鏡把白色包包精準染色，完全不影響外圍去背透明
                 lMain.style.display = 'block';
-                lMain.style.backgroundImage = `url('${imgPath}cat_main.png')`;
-                lMainBg.style.display = 'block';
-                lMainBg.style.backgroundColor = currentMainColor;
+                lMain.src = `${imgPath}cat_main.png`;
+                lMain.style.filter = `drop-shadow(0px 0px 0px ${currentMainColor})`;
+                lMain.style.backgroundColor = currentMainColor;
 
                 if (currentCatPattern === 'tuxedo') {
-                    lTux.style.display = 'block';
-                    lTux.style.backgroundImage = `url('${imgPath}cat_patch_tuxedo.png')`;
-                    lTuxBg.style.display = 'block';
-                    lTuxBg.style.backgroundColor = currentTuxedoColor;
+                    lTuxedo.style.display = 'block';
+                    lTuxedo.src = `${imgPath}cat_patch_tuxedo.png`;
+                    lTuxedo.style.filter = `drop-shadow(0px 0px 0px ${currentTuxedoColor})`;
+                    lTuxedo.style.backgroundColor = currentTuxedoColor;
                 } else {
-                    lTux.style.display = 'none';
-                    lTuxBg.style.display = 'none';
+                    lTuxedo.style.display = 'none';
                 }
             }
 
-            // 渲染表情（一般印刷 vs 皮革壓印）
-            lFace.style.backgroundImage = `url('${imgPath}cat_face_black.png')`;
+            // 2. 表情工藝處理
+            lFace.src = `${imgPath}cat_face_black.png`;
             if (currentExpression === 'emboss') {
                 lFace.className = "bag-layer face-emboss-effect";
             } else {
-                lFace.className = "bag-layer"; // 恢復純黑
+                lFace.className = "bag-layer"; 
             }
 
-            // 渲染五金顏色
-            lHardware.style.backgroundImage = `url('${imgPath}cat_hardware.png')`;
+            // 3. 五金變色處理
+            lHardware.src = `${imgPath}cat_hardware.png`;
             lHardware.className = `bag-layer ${currentHardware}`;
         }
 
