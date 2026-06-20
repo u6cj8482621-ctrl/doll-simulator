@@ -176,6 +176,14 @@
             mask-size: 100% 100%;
         }
 
+        .strap-layer {
+            position: absolute;
+            z-index: 8;
+            border-radius: 999px;
+            pointer-events: none;
+            transform-origin: left center;
+        }
+
         /* 表情工藝加工濾鏡（基於 cat_face_black.png 轉換） */
         .face-emboss       { filter: opacity(0.4) contrast(0.7) brightness(1.2); mix-blend-mode: multiply; }          /* 壓印：半透明自然凹陷感 */
         .face-foil-gold    { filter: invert(34%) sepia(87%) saturate(464%) hue-rotate(5deg) brightness(110%) contrast(93%); } /* 燙金-金 */
@@ -253,6 +261,7 @@
             <div class="doll-stage">
                 <div id="doll-skin-fill" class="doll-skin-fill"></div>
                 <img id="doll-mask" class="layer-img" style="z-index: 1;" src="dolls/body_ob11.png" alt="娃娃素體">
+                <div id="layer-strap" class="strap-layer"></div>
 
                 <div id="layer-main-color" class="bag-layer mask-layer" style="z-index:10;"></div>
 
@@ -298,12 +307,14 @@
         const OB11_REFERENCE_HEIGHT_CM = 12.5;
         const STANDARD_PX_PER_CM = (STANDARD_CANVAS_SIZE_PX * 0.6767) / OB11_REFERENCE_HEIGHT_CM;
         const BAG_IMAGE_RATIO = 397 / 316;
+        const STRAP_WIDTH_CM = 0.22;
+        const STRAP_HARDWARE_ANCHOR = { xRatio: 0.045, yRatio: 0.04 };
         const dollScalePresets = {
-            'OB11': { canvasSizePx: STANDARD_CANVAS_SIZE_PX, pxPerCm: STANDARD_PX_PER_CM, bodyLeftRatio: 0.3762, bodyTopRatio: 0.2060, bagXcm: 3.81, bagYcm: 7.61, bagSizeCm: 3.0, bagRotationDeg: -4 },
-            '黏土娃': { canvasSizePx: STANDARD_CANVAS_SIZE_PX, pxPerCm: (STANDARD_CANVAS_SIZE_PX * 0.6306) / 11.1, bodyLeftRatio: 0.3940, bodyTopRatio: 0.2567, bagXcm: 3.41, bagYcm: 6.87, bagSizeCm: 3.0, bagRotationDeg: -4 },
-            '新 P9': { canvasSizePx: STANDARD_CANVAS_SIZE_PX, pxPerCm: STANDARD_PX_PER_CM, bodyLeftRatio: 0.3540, bodyTopRatio: 0.2034, bagXcm: 3.92, bagYcm: 7.67, bagSizeCm: 3.0, bagRotationDeg: -4 },
-            '10cm': { canvasSizePx: STANDARD_CANVAS_SIZE_PX, pxPerCm: (STANDARD_CANVAS_SIZE_PX * 0.6708) / 10, bodyLeftRatio: 0.2848, bodyTopRatio: 0.2142, bagXcm: 4.95, bagYcm: 7.89, bagSizeCm: 3.0, bagRotationDeg: -4 },
-            '20cm': { canvasSizePx: LARGE_CANVAS_SIZE_PX, pxPerCm: (LARGE_CANVAS_SIZE_PX * 0.7823) / 20, bodyLeftRatio: 0.2765, bodyTopRatio: 0.1422, bagXcm: 8.96, bagYcm: 13.86, bagSizeCm: 3.0, bagRotationDeg: -4 }
+            'OB11': { canvasSizePx: STANDARD_CANVAS_SIZE_PX, pxPerCm: STANDARD_PX_PER_CM, bodyLeftRatio: 0.3762, bodyTopRatio: 0.2060, strapShoulderXRatio: 0.46, strapShoulderYRatio: 0.43, bagXcm: 3.81, bagYcm: 7.61, bagSizeCm: 3.0, bagRotationDeg: -4 },
+            '黏土娃': { canvasSizePx: STANDARD_CANVAS_SIZE_PX, pxPerCm: (STANDARD_CANVAS_SIZE_PX * 0.6306) / 11.1, bodyLeftRatio: 0.3940, bodyTopRatio: 0.2567, strapShoulderXRatio: 0.46, strapShoulderYRatio: 0.47, bagXcm: 3.41, bagYcm: 6.87, bagSizeCm: 3.0, bagRotationDeg: -4 },
+            '新 P9': { canvasSizePx: STANDARD_CANVAS_SIZE_PX, pxPerCm: STANDARD_PX_PER_CM, bodyLeftRatio: 0.3540, bodyTopRatio: 0.2034, strapShoulderXRatio: 0.45, strapShoulderYRatio: 0.45, bagXcm: 3.92, bagYcm: 7.67, bagSizeCm: 3.0, bagRotationDeg: -4 },
+            '10cm': { canvasSizePx: STANDARD_CANVAS_SIZE_PX, pxPerCm: (STANDARD_CANVAS_SIZE_PX * 0.6708) / 10, bodyLeftRatio: 0.2848, bodyTopRatio: 0.2142, strapShoulderXRatio: 0.40, strapShoulderYRatio: 0.45, bagXcm: 4.95, bagYcm: 7.89, bagSizeCm: 3.0, bagRotationDeg: -4 },
+            '20cm': { canvasSizePx: LARGE_CANVAS_SIZE_PX, pxPerCm: (LARGE_CANVAS_SIZE_PX * 0.7823) / 20, bodyLeftRatio: 0.2765, bodyTopRatio: 0.1422, strapShoulderXRatio: 0.39, strapShoulderYRatio: 0.42, bagXcm: 8.96, bagYcm: 13.86, bagSizeCm: 3.0, bagRotationDeg: -4 }
         };
         let bagCalibration = { xCm: 3.35, yCm: 6.70, sizeCm: 3.0, rotationDeg: -4 };
         let activeDollValue = 'OB11';
@@ -482,6 +493,27 @@
             layer.style.maskImage = cssMaskUrl;
         }
 
+        function applyStrapPlacement(preset, bagCenterX, bagCenterY, bagWidth, bagHeight) {
+            const strap = document.getElementById('layer-strap');
+            const bagAngle = bagCalibration.rotationDeg * Math.PI / 180;
+            const localAnchorX = (STRAP_HARDWARE_ANCHOR.xRatio - 0.5) * bagWidth;
+            const localAnchorY = (STRAP_HARDWARE_ANCHOR.yRatio - 0.5) * bagHeight;
+            const hardwareX = bagCenterX + (localAnchorX * Math.cos(bagAngle)) - (localAnchorY * Math.sin(bagAngle));
+            const hardwareY = bagCenterY + (localAnchorX * Math.sin(bagAngle)) + (localAnchorY * Math.cos(bagAngle));
+            const shoulderX = preset.canvasSizePx * preset.strapShoulderXRatio;
+            const shoulderY = preset.canvasSizePx * preset.strapShoulderYRatio;
+            const deltaX = hardwareX - shoulderX;
+            const deltaY = hardwareY - shoulderY;
+            const strapWidth = STRAP_WIDTH_CM * preset.pxPerCm;
+
+            strap.style.left = `${shoulderX}px`;
+            strap.style.top = `${shoulderY - (strapWidth / 2)}px`;
+            strap.style.width = `${Math.hypot(deltaX, deltaY)}px`;
+            strap.style.height = `${strapWidth}px`;
+            strap.style.backgroundColor = currentMainColor;
+            strap.style.transform = `rotate(${Math.atan2(deltaY, deltaX) * 180 / Math.PI}deg)`;
+        }
+
         function applyBagPlacement() {
             const preset = dollScalePresets[subCategory.value] || dollScalePresets['OB11'];
             const pxPerCm = preset.pxPerCm;
@@ -509,6 +541,14 @@
                 layer.style.top = `${topPx}px`;
                 layer.style.transform = `rotate(${bagCalibration.rotationDeg}deg)`;
             });
+
+            applyStrapPlacement(
+                preset,
+                leftPx + (widthPx / 2),
+                topPx + (heightPx / 2),
+                widthPx,
+                heightPx
+            );
         }
 
         function refreshLayers() {
