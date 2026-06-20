@@ -99,18 +99,8 @@
         }
         .color-swatch:hover { transform: scale(1.1); }
         .color-swatch.active { border-color: #333; box-shadow: 0 0 4px rgba(0,0,0,0.3); }
-        .skin-swatch-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .skin-swatch {
-            height: 38px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            color: #444;
-            background: #fff;
-        }
-        .skin-swatch:hover { border-color: #ff8fa3; }
         .skin-color-input { width: 100%; height: 42px; padding: 3px; border: 1px solid #ddd; border-radius: 8px; background: #fff; cursor: pointer; }
+        .custom-skin-row { display: none; }
 
         /* 右側畫布區 */
         .display-area {
@@ -221,16 +211,17 @@
                 </select>
             </div>
             <div class="control-group">
-                <label>快速膚色</label>
-                <div class="skin-swatch-row">
-                    <button class="skin-swatch" type="button" style="background-color:#e5dbcc;" onclick="applySkinColor('#e5dbcc')">白肌</button>
-                    <button class="skin-swatch" type="button" style="background-color:#e3d2b9;" onclick="applySkinColor('#e3d2b9')">普肌</button>
-                </div>
+                <label for="skin-preset">膚色</label>
+                <select id="skin-preset" onchange="handleSkinPresetChange()">
+                    <option value="normal" selected>普肌</option>
+                    <option value="white">白肌</option>
+                    <option value="custom">自訂膚色</option>
+                </select>
             </div>
-            <div class="control-group">
-                <label for="custom-skin-color">自訂膚色</label>
-                <input id="custom-skin-color" class="skin-color-input" type="color" value="#e3d2b9" oninput="applySkinColor(this.value)">
-            </div>
+        </div>
+        <div id="custom-skin-row" class="control-group custom-skin-row">
+            <label for="custom-skin-color">自訂膚色</label>
+            <input id="custom-skin-color" class="skin-color-input" type="color" value="#e3d2b9" oninput="applySkinColor(this.value)">
         </div>
 
         <div class="control-group">
@@ -304,6 +295,8 @@
         const mainCategory = document.getElementById('main-category');
         const subCategory = document.getElementById('sub-category');
         const skinFill = document.getElementById('doll-skin-fill');
+        const skinPreset = document.getElementById('skin-preset');
+        const customSkinRow = document.getElementById('custom-skin-row');
         const customSkinColor = document.getElementById('custom-skin-color');
         const dollMask = document.getElementById('doll-mask');
 
@@ -322,8 +315,15 @@
 
         function applySkinColor(color) {
             skinFill.style.backgroundColor = color;
-            customSkinColor.value = color;
+            if (skinPreset.value === 'custom') customSkinColor.value = color;
             dollMask.style.filter = "none";
+        }
+
+        function handleSkinPresetChange() {
+            const isCustom = skinPreset.value === 'custom';
+            customSkinRow.style.display = isCustom ? 'flex' : 'none';
+            const presetColors = { normal: '#e3d2b9', white: '#e5dbcc' };
+            applySkinColor(isCustom ? customSkinColor.value : presetColors[skinPreset.value]);
         }
 
         function resetBagCalibrationForDoll() {
@@ -541,7 +541,7 @@
 
         window.onload = function() {
             updateSubCategory();
-            applySkinColor('#e3d2b9');
+            handleSkinPresetChange();
         }
     </script>
 </body>
