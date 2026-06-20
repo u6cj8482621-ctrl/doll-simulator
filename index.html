@@ -272,13 +272,13 @@
         const CANVAS_SIZE_PX = 550;
         const BAG_IMAGE_RATIO = 397 / 316;
         const dollScalePresets = {
-            'OB11': { heightCm: 11, bagXcm: 4.0, bagYcm: 4.7, bagSizeCm: 3.0, bagRotationDeg: -8 },
-            '黏土娃': { heightCm: 11, bagXcm: 4.0, bagYcm: 4.8, bagSizeCm: 3.0, bagRotationDeg: -8 },
-            '新 P9': { heightCm: 11, bagXcm: 4.0, bagYcm: 4.7, bagSizeCm: 3.0, bagRotationDeg: -8 },
-            '10cm': { heightCm: 10, bagXcm: 3.5, bagYcm: 4.2, bagSizeCm: 3.0, bagRotationDeg: -8 },
-            '20cm': { heightCm: 20, bagXcm: 7.1, bagYcm: 8.4, bagSizeCm: 3.0, bagRotationDeg: -8 }
+            'OB11': { heightCm: 11, bodyLeftRatio: 0.3762, bodyTopRatio: 0.2060, bodyHeightRatio: 0.6767, bagXcm: 3.35, bagYcm: 6.70, bagSizeCm: 3.0, bagRotationDeg: -4 },
+            '黏土娃': { heightCm: 11, bodyLeftRatio: 0.3940, bodyTopRatio: 0.2567, bodyHeightRatio: 0.6306, bagXcm: 3.15, bagYcm: 6.35, bagSizeCm: 3.0, bagRotationDeg: -4 },
+            '新 P9': { heightCm: 11, bodyLeftRatio: 0.3540, bodyTopRatio: 0.2034, bodyHeightRatio: 0.7131, bagXcm: 3.45, bagYcm: 6.75, bagSizeCm: 3.0, bagRotationDeg: -4 },
+            '10cm': { heightCm: 10, bodyLeftRatio: 0.2848, bodyTopRatio: 0.2142, bodyHeightRatio: 0.6708, bagXcm: 4.55, bagYcm: 6.10, bagSizeCm: 3.0, bagRotationDeg: -4 },
+            '20cm': { heightCm: 20, bodyLeftRatio: 0.2765, bodyTopRatio: 0.1422, bodyHeightRatio: 0.7823, bagXcm: 8.25, bagYcm: 12.20, bagSizeCm: 3.0, bagRotationDeg: -4 }
         };
-        let bagCalibration = { xCm: 4.0, yCm: 4.7, sizeCm: 3.0, rotationDeg: -8 };
+        let bagCalibration = { xCm: 3.35, yCm: 6.70, sizeCm: 3.0, rotationDeg: -4 };
         let activeDollValue = 'OB11';
 
         const sidebar = document.getElementById('sidebar');
@@ -373,7 +373,7 @@
                 </div>
                 <div id="color-pickers-zone"></div>
                 <hr style="border: 0; border-top: 1px solid #e6e6e6; margin: 2px 0;">
-                <p class="calibration-note">尺寸校準：包包以公分換算顯示，X/Y 是包包中心點，從畫布左上角起算。先用滑桿把 3cm 包包放到素體上，再固定為該素體預設。</p>
+                <p class="calibration-note">尺寸校準：包包以公分換算顯示，X/Y 是包包中心點，從素體可視左上角起算。包包大小依素體可視高度換算，會比用整張畫布更接近實際比例。</p>
                 ${renderRangeControl('xCm', '包包中心 X', 0, 20, 0.1, 'cm')}
                 ${renderRangeControl('yCm', '包包中心 Y', 0, 20, 0.1, 'cm')}
                 ${renderRangeControl('sizeCm', '包包寬度', 1, 6, 0.1, 'cm')}
@@ -442,11 +442,13 @@
 
         function applyBagPlacement() {
             const preset = dollScalePresets[subCategory.value] || dollScalePresets['OB11'];
-            const pxPerCm = CANVAS_SIZE_PX / preset.heightCm;
+            const pxPerCm = (CANVAS_SIZE_PX * preset.bodyHeightRatio) / preset.heightCm;
             const widthPx = bagCalibration.sizeCm * pxPerCm;
             const heightPx = widthPx / BAG_IMAGE_RATIO;
-            const leftPx = (bagCalibration.xCm * pxPerCm) - (widthPx / 2);
-            const topPx = (bagCalibration.yCm * pxPerCm) - (heightPx / 2);
+            const originX = CANVAS_SIZE_PX * preset.bodyLeftRatio;
+            const originY = CANVAS_SIZE_PX * preset.bodyTopRatio;
+            const leftPx = originX + (bagCalibration.xCm * pxPerCm) - (widthPx / 2);
+            const topPx = originY + (bagCalibration.yCm * pxPerCm) - (heightPx / 2);
             const layerIds = [
                 'layer-main-color',
                 'layer-tuxedo-color',
