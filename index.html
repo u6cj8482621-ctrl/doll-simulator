@@ -8,25 +8,73 @@
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             background-color: #f5f5f5;
             display: flex;
-            gap: 20px;
             height: 100vh;
+            box-sizing: border-box;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 手機版頂部工具列 (預設隱藏，手機才顯示) */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 99;
+            align-items: center;
+            padding: 0 15px;
             box-sizing: border-box;
         }
 
-        /* 左側控制面板 */
+        /* 展開/收合側欄按鈕 */
+        .toggle-btn {
+            background-color: #ffb6c1;
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .toggle-btn:hover {
+            background-color: #ffa0b0;
+        }
+
+        /* 左側控制面板 (支援桌機固定、手機抽屜式收合) */
         .control-panel {
             width: 360px;
+            min-width: 360px;
             background-color: #ffffff;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
             display: flex;
             flex-direction: column;
             gap: 15px;
             overflow-y: auto;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        /* 側欄內部的關閉按鈕 (手機版才有用) */
+        .close-sidebar-btn {
+            display: none;
+            background-color: #ccc;
+            color: #333;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            align-self: flex-end;
         }
 
         h2 {
@@ -84,17 +132,42 @@
             padding: 2px;
         }
 
+        /* 色票區塊樣式 */
+        .color-palette {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+
+        .color-swatch {
+            width: 35px;
+            height: 35px;
+            border-radius: 4px;
+            border: 2px solid #ccc;
+            cursor: pointer;
+            transition: transform 0.1s, border-color 0.1s;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+        }
+
+        .color-swatch.active {
+            border-color: #333;
+            box-shadow: 0 0 4px rgba(0,0,0,0.3);
+        }
+
         /* 右側顯示區域 */
         .display-area {
             flex: 1;
             background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
-            overflow: hidden;
+            overflow: auto; /* 允許手機上縮放和滾動查看畫布 */
+            padding: 20px;
         }
 
         /* 1*1CM 網格畫布 (同步 PS 118px 基準) */
@@ -102,6 +175,8 @@
             position: relative;
             width: 500px;
             height: 500px;
+            min-width: 500px; /* 防止畫布被手機壓扁 */
+            min-height: 500px;
             border: 2px solid #ccc;
             background-color: #fafafa;
             background-image: 
@@ -123,17 +198,17 @@
             align-items: center;
         }
 
-        /* 底層膚色純色塊：負責透過你的 PNG 挖空處顯色 */
+        /* 底層膚色純色塊 */
         .doll-skin-layer {
             position: absolute;
             width: 100%;
             height: 100%;
-            background-color: #fcd7b8; /* 預設普肌色碼 */
+            background-color: #fcd7b8; 
             z-index: 1;
             transition: background-color 0.1s;
         }
 
-        /* 你的去背白底素體圖片（疊在最上層，挖空處會透出底層顏色） */
+        /* 上層自 dolls/ 資料夾載入的挖空素體圖 */
         .doll-mask-img {
             position: absolute;
             width: 100%;
@@ -195,32 +270,6 @@
         .bag-unit.cat-shape::before { left: 6px; }
         .bag-unit.cat-shape::after { right: 6px; }
 
-        /* 色票區塊樣式 */
-        .color-palette {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 4px;
-        }
-
-        .color-swatch {
-            width: 35px;
-            height: 35px;
-            border-radius: 4px;
-            border: 2px solid #ccc;
-            cursor: pointer;
-            transition: transform 0.1s, border-color 0.1s;
-        }
-
-        .color-swatch:hover {
-            transform: scale(1.1);
-        }
-
-        .color-swatch.active {
-            border-color: #333;
-            box-shadow: 0 0 4px rgba(0,0,0,0.3);
-        }
-
         .bag-patch {
             position: absolute;
             width: 100%;
@@ -264,16 +313,60 @@
             background: rgba(255,255,255,0.8);
             border-radius: 3px;
         }
+
+        /* 📱 手機與平版 RWD 樣式覆蓋 (螢幕小於 768px 時啟動) */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+                padding-top: 50px; /* 給頂部工具列留空間 */
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .control-panel {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                width: 300px;
+                min-width: 300px;
+                transform: translateX(-100%); /* 預設完全縮到螢幕左側外面 */
+                box-shadow: 4px 0 10px rgba(0,0,0,0.2);
+            }
+
+            /* 當啟動 open 樣式時，側欄滑入螢幕 */
+            .control-panel.open {
+                transform: translateX(0);
+            }
+
+            .close-sidebar-btn {
+                display: block; /* 手機版顯示關閉按鈕 */
+            }
+
+            .display-area {
+                padding: 10px;
+                width: 100%;
+                height: calc(100vh - 50px);
+                align-items: flex-start; /* 讓手機版更好滾動 */
+            }
+        }
     </style>
 </head>
 <body>
 
-    <!-- 左側控制面板 -->
-    <div class="control-panel">
+    <div class="mobile-header">
+        <button class="toggle-btn" onclick="toggleSidebar()">☰ 選單設定</button>
+        <span style="margin-left: 15px; font-weight: bold; color: #555;">2D 模擬器</span>
+    </div>
+
+    <div class="control-panel" id="sidebar">
+        <button class="close-sidebar-btn" onclick="toggleSidebar()">✕ 收起選單</button>
+        
         <h2>素體模擬器</h2>
         <hr style="border: 0; border-top: 1px solid #eee; margin: 0;">
         
-        <!-- 並排配置：素體類型 與 快速膚色 -->
         <div class="row-group">
             <div class="control-group">
                 <label for="main-category">素體類型</label>
@@ -292,23 +385,19 @@
             </div>
         </div>
 
-        <!-- 自訂膚色調色盤（點選自訂時可隨意拉顏色） -->
         <div class="control-group" id="custom-skin-container" style="display: none;">
-            <label for="skin-color-picker">點擊調色盤或調整膚色：</label>
+            <label for="skin-color-picker">點擊調色盤調整膚色：</label>
             <input type="color" id="skin-color-picker" value="#fcd7b8" oninput="syncSkinColor(this.value)">
         </div>
 
-        <!-- 體型款式 -->
         <div class="control-group">
             <label for="sub-category">體型款式 (每格1x1cm)</label>
             <select id="sub-category" onchange="updateDollImage()">
-                <!-- 由 JS 動態生成 -->
-            </select>
+                </select>
         </div>
 
         <hr style="border: 0; border-top: 1px solid #eee; margin: 5px 0;">
 
-        <!-- 包包款式選擇 -->
         <div class="control-group">
             <label for="bag-style">包包款式 (側背)</label>
             <select id="bag-style" onchange="updateBagStyle()">
@@ -318,20 +407,15 @@
             </select>
         </div>
 
-        <!-- 動態產生的包包細節選單 -->
         <div id="dynamic-options" class="dynamic-group"></div>
     </div>
 
-    <!-- 右側顯示區域 -->
     <div class="display-area">
         <div class="canvas">
             <div class="doll-stage">
-                <!-- 底層顏色塊 -->
                 <div id="doll-skin" class="doll-skin-layer"></div>
-                <!-- 上層你的去背遮色片圖 -->
                 <img id="doll-mask" class="doll-mask-img" src="dolls/body_ob11.png" alt="娃娃素體">
                 
-                <!-- 包包配件系統 -->
                 <div class="bag-system">
                     <div id="strap" class="strap"></div>
                     <div id="bag" class="bag-unit cat-shape">
@@ -346,6 +430,7 @@
     </div>
 
     <script>
+        const sidebar = document.getElementById('sidebar');
         const mainCategory = document.getElementById('main-category');
         const subCategory = document.getElementById('sub-category');
         const skinPreset = document.getElementById('skin-preset');
@@ -375,6 +460,11 @@
 
         let currentMainColor = '#d4a373';
         let currentPatchColor = '#f8f9fa';
+
+        // 📱 控制手機版側欄切換 (展開/收合)
+        function toggleSidebar() {
+            sidebar.classList.toggle('open');
+        }
 
         // 1. 大分類切換
         function updateSubCategory() {
@@ -414,7 +504,7 @@
             }
         }
 
-        // 3. 膚色控制機制：點擊快速選單切換底色色碼
+        // 3. 膚色控制機制
         function applySkinPreset() {
             const preset = skinPreset.value;
             if (preset === '普肌') {
@@ -429,7 +519,6 @@
             }
         }
 
-        // 同步底層變色
         function syncSkinColor(hexColor) {
             dollSkin.style.backgroundColor = hexColor;
             skinColorPicker.value = hexColor;
