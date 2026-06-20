@@ -236,7 +236,7 @@
         <div class="control-group">
             <label for="bag-style">包包款式</label>
             <select id="bag-style" onchange="onDollOrBagChange()">
-                <option value="cat" selected>萬用貓貓包</option>
+                <option value="cat" selected>貓貓包</option>
             </select>
         </div>
 
@@ -412,6 +412,7 @@
                 <div class="control-group">
                     <label>燙金/壓印加工</label>
                     <select onchange="currentExpression=this.value; refreshLayers();">
+                        <option value="face-none" ${currentExpression==='face-none'?'selected':''}>無加工</option>
                         <option value="face-emboss" ${currentExpression==='face-emboss'?'selected':''}>凹凸壓印</option>
                         <option value="face-foil-gold" ${currentExpression==='face-foil-gold'?'selected':''}>經典燙金</option>
                         <option value="face-foil-silver" ${currentExpression==='face-foil-silver'?'selected':''}>極光燙銀</option>
@@ -432,6 +433,9 @@
                 `;
                 buildPalette('main-pal', 'main');
                 buildPalette('tux-pal', 'tuxedo');
+            } else if (currentCatPattern === 'calico') {
+                zone.innerHTML = `<div class="control-group"><label>包包底色</label><div class="color-palette" id="main-pal"></div></div>`;
+                buildPalette('main-pal', 'main');
             }
         }
 
@@ -508,10 +512,13 @@
             if (currentCatPattern === 'calico') {
                 lCalico.style.display = 'block';
                 lCalico.src = `${imgPath}cat_calico.png`;
-                
-                lMainColor.style.display = 'none';
+
+                lMainColor.style.display = 'block';
+                lMainColor.src = `${imgPath}cat_main.png`;
+                lMainColor.style.filter = hexToFilter(currentMainColor);
+                lMainLine.style.display = 'block';
+                lMainLine.src = `${imgPath}cat_main.png`;
                 lTuxColor.style.display = 'none';
-                lMainLine.style.display = 'none';
                 lTuxLine.style.display = 'none';
             } else {
                 lCalico.style.display = 'none';
@@ -539,8 +546,13 @@
             }
 
             // 3. 表情加工變色（利用覆蓋全網頁支援的精準反轉色矩陣）
-            lFace.src = `${imgPath}cat_face_black.png`;
-            lFace.className = `bag-layer ${currentExpression}`;
+            if (currentExpression === 'face-none') {
+                lFace.style.display = 'none';
+            } else {
+                lFace.style.display = 'block';
+                lFace.src = `${imgPath}cat_face_black.png`;
+                lFace.className = `bag-layer ${currentExpression}`;
+            }
 
             // 4. 五金加工變色（利用覆蓋全網頁支援的精準反轉色矩陣）
             lHardware.src = `${imgPath}cat_hardware.png`;
