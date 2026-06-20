@@ -17,7 +17,7 @@
             position: relative;
         }
 
-        /* 手機版頂部工具列 (預設隱藏，手機才顯示) */
+        /* 手機版頂部工具列 */
         .mobile-header {
             display: none;
             position: fixed;
@@ -49,7 +49,7 @@
             background-color: #ffa0b0;
         }
 
-        /* 左側控制面板 (支援桌機固定、手機抽屜式收合) */
+        /* 左側控制面板 */
         .control-panel {
             width: 360px;
             min-width: 360px;
@@ -64,7 +64,7 @@
             transition: transform 0.3s ease;
         }
 
-        /* 側欄內部的關閉按鈕 (手機版才有用) */
+        /* 側欄內部的關閉按鈕 */
         .close-sidebar-btn {
             display: none;
             background-color: #ccc;
@@ -166,7 +166,7 @@
             justify-content: center;
             align-items: center;
             position: relative;
-            overflow: auto; /* 允許手機上縮放和滾動查看畫布 */
+            overflow: auto;
             padding: 20px;
         }
 
@@ -175,7 +175,7 @@
             position: relative;
             width: 500px;
             height: 500px;
-            min-width: 500px; /* 防止畫布被手機壓扁 */
+            min-width: 500px;
             min-height: 500px;
             border: 2px solid #ccc;
             background-color: #fafafa;
@@ -203,7 +203,7 @@
             position: absolute;
             width: 100%;
             height: 100%;
-            background-color: #fcd7b8; 
+            background-color: #e3d2b9; /* 預設使用你提供的新普肌色碼 */
             z-index: 1;
             transition: background-color 0.1s;
         }
@@ -314,11 +314,11 @@
             border-radius: 3px;
         }
 
-        /* 📱 手機與平版 RWD 樣式覆蓋 (螢幕小於 768px 時啟動) */
+        /* 手機與平版 RWD 樣式覆蓋 */
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
-                padding-top: 50px; /* 給頂部工具列留空間 */
+                padding-top: 50px;
             }
 
             .mobile-header {
@@ -332,41 +332,43 @@
                 height: 100vh;
                 width: 300px;
                 min-width: 300px;
-                transform: translateX(-100%); /* 預設完全縮到螢幕左側外面 */
+                transform: translateX(-100%);
                 box-shadow: 4px 0 10px rgba(0,0,0,0.2);
             }
 
-            /* 當啟動 open 樣式時，側欄滑入螢幕 */
             .control-panel.open {
                 transform: translateX(0);
             }
 
             .close-sidebar-btn {
-                display: block; /* 手機版顯示關閉按鈕 */
+                display: block;
             }
 
             .display-area {
                 padding: 10px;
                 width: 100%;
                 height: calc(100vh - 50px);
-                align-items: flex-start; /* 讓手機版更好滾動 */
+                align-items: flex-start;
             }
         }
     </style>
 </head>
 <body>
 
+    <!-- 手機版頂部工具列 -->
     <div class="mobile-header">
         <button class="toggle-btn" onclick="toggleSidebar()">☰ 選單設定</button>
         <span style="margin-left: 15px; font-weight: bold; color: #555;">2D 模擬器</span>
     </div>
 
+    <!-- 左側控制面板 -->
     <div class="control-panel" id="sidebar">
         <button class="close-sidebar-btn" onclick="toggleSidebar()">✕ 收起選單</button>
         
         <h2>素體模擬器</h2>
         <hr style="border: 0; border-top: 1px solid #eee; margin: 0;">
         
+        <!-- 並排配置 -->
         <div class="row-group">
             <div class="control-group">
                 <label for="main-category">素體類型</label>
@@ -385,19 +387,23 @@
             </div>
         </div>
 
+        <!-- 自訂膚色調色盤 -->
         <div class="control-group" id="custom-skin-container" style="display: none;">
             <label for="skin-color-picker">點擊調色盤調整膚色：</label>
-            <input type="color" id="skin-color-picker" value="#fcd7b8" oninput="syncSkinColor(this.value)">
+            <input type="color" id="skin-color-picker" value="#e3d2b9" oninput="syncSkinColor(this.value)">
         </div>
 
+        <!-- 體型款式 -->
         <div class="control-group">
             <label for="sub-category">體型款式 (每格1x1cm)</label>
             <select id="sub-category" onchange="updateDollImage()">
-                </select>
+                <!-- 由 JS 動態生成 -->
+            </select>
         </div>
 
         <hr style="border: 0; border-top: 1px solid #eee; margin: 5px 0;">
 
+        <!-- 包包款式選擇 -->
         <div class="control-group">
             <label for="bag-style">包包款式 (側背)</label>
             <select id="bag-style" onchange="updateBagStyle()">
@@ -407,15 +413,20 @@
             </select>
         </div>
 
+        <!-- 動態產生的包包細節選單 -->
         <div id="dynamic-options" class="dynamic-group"></div>
     </div>
 
+    <!-- 右側顯示區域 -->
     <div class="display-area">
         <div class="canvas">
             <div class="doll-stage">
+                <!-- 底層顏色塊 -->
                 <div id="doll-skin" class="doll-skin-layer"></div>
+                <!-- 上層去背遮色片圖 -->
                 <img id="doll-mask" class="doll-mask-img" src="dolls/body_ob11.png" alt="娃娃素體">
                 
+                <!-- 包包配件系統 -->
                 <div class="bag-system">
                     <div id="strap" class="strap"></div>
                     <div id="bag" class="bag-unit cat-shape">
@@ -461,7 +472,7 @@
         let currentMainColor = '#d4a373';
         let currentPatchColor = '#f8f9fa';
 
-        // 📱 控制手機版側欄切換 (展開/收合)
+        // 控制手機版側欄切換
         function toggleSidebar() {
             sidebar.classList.toggle('open');
         }
@@ -504,15 +515,15 @@
             }
         }
 
-        // 3. 膚色控制機制
+        // 3. 膚色控制機制：點擊快速選單切換成你設定的新色碼
         function applySkinPreset() {
             const preset = skinPreset.value;
             if (preset === '普肌') {
                 customSkinContainer.style.display = 'none';
-                syncSkinColor('#fcd7b8');
+                syncSkinColor('#e3d2b9'); // 寫入你設定的普肌色碼
             } else if (preset === '白肌') {
                 customSkinContainer.style.display = 'none';
-                syncSkinColor('#fff0e5');
+                syncSkinColor('#e5dbcc'); // 寫入你設定的白肌色碼
             } else if (preset === '自訂') {
                 customSkinContainer.style.display = 'block';
                 syncSkinColor(skinColorPicker.value);
