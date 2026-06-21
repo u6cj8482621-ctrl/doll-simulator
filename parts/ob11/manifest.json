@@ -1,0 +1,426 @@
+{
+  "source": "source/ob11.png",
+  "canvas": [
+    575,
+    1526
+  ],
+  "parts": {
+    "hip": {
+      "file": "parts/ob11/body/hip.png",
+      "bbox": [
+        118,
+        763,
+        456,
+        923
+      ],
+      "size": [
+        338,
+        160
+      ]
+    },
+    "torso": {
+      "file": "parts/ob11/body/torso.png",
+      "bbox": [
+        137,
+        442,
+        438,
+        942
+      ],
+      "size": [
+        301,
+        500
+      ]
+    },
+    "head": {
+      "file": "parts/ob11/body/head.png",
+      "bbox": [
+        38,
+        0,
+        537,
+        496
+      ],
+      "size": [
+        499,
+        496
+      ]
+    },
+    "upper_arm_L": {
+      "file": "parts/ob11/body/upper_arm_L.png",
+      "bbox": [
+        50,
+        560,
+        176,
+        750
+      ],
+      "size": [
+        126,
+        190
+      ]
+    },
+    "upper_arm_R": {
+      "file": "parts/ob11/body/upper_arm_R.png",
+      "bbox": [
+        400,
+        560,
+        525,
+        750
+      ],
+      "size": [
+        125,
+        190
+      ]
+    },
+    "forearm_L": {
+      "file": "parts/ob11/body/forearm_L.png",
+      "bbox": [
+        24,
+        740,
+        126,
+        888
+      ],
+      "size": [
+        102,
+        148
+      ]
+    },
+    "forearm_R": {
+      "file": "parts/ob11/body/forearm_R.png",
+      "bbox": [
+        450,
+        740,
+        551,
+        888
+      ],
+      "size": [
+        101,
+        148
+      ]
+    },
+    "thigh_L": {
+      "file": "parts/ob11/body/thigh_L.png",
+      "bbox": [
+        118,
+        918,
+        277,
+        1150
+      ],
+      "size": [
+        159,
+        232
+      ]
+    },
+    "thigh_R": {
+      "file": "parts/ob11/body/thigh_R.png",
+      "bbox": [
+        296,
+        918,
+        455,
+        1150
+      ],
+      "size": [
+        159,
+        232
+      ]
+    },
+    "shin_L": {
+      "file": "parts/ob11/body/shin_L.png",
+      "bbox": [
+        131,
+        1175,
+        252,
+        1400
+      ],
+      "size": [
+        121,
+        225
+      ]
+    },
+    "shin_R": {
+      "file": "parts/ob11/body/shin_R.png",
+      "bbox": [
+        324,
+        1176,
+        445,
+        1400
+      ],
+      "size": [
+        121,
+        224
+      ]
+    },
+    "hand_L": {
+      "file": "parts/ob11/body/hand_L.png",
+      "bbox": [
+        0,
+        854,
+        111,
+        1068
+      ],
+      "size": [
+        111,
+        214
+      ]
+    },
+    "hand_R": {
+      "file": "parts/ob11/body/hand_R.png",
+      "bbox": [
+        463,
+        854,
+        575,
+        1068
+      ],
+      "size": [
+        112,
+        214
+      ]
+    },
+    "foot_L": {
+      "file": "parts/ob11/body/foot_L.png",
+      "bbox": [
+        98,
+        1406,
+        236,
+        1526
+      ],
+      "size": [
+        138,
+        120
+      ]
+    },
+    "foot_R": {
+      "file": "parts/ob11/body/foot_R.png",
+      "bbox": [
+        340,
+        1406,
+        477,
+        1526
+      ],
+      "size": [
+        137,
+        120
+      ]
+    },
+    "shoulder_ball_L": {
+      "file": "parts/ob11/body/shoulder_ball_L.png",
+      "bbox": [
+        120,
+        541,
+        196,
+        617
+      ],
+      "size": [
+        76,
+        76
+      ]
+    },
+    "shoulder_ball_R": {
+      "file": "parts/ob11/body/shoulder_ball_R.png",
+      "bbox": [
+        378,
+        541,
+        454,
+        617
+      ],
+      "size": [
+        76,
+        76
+      ]
+    },
+    "elbow_ball_L": {
+      "file": "parts/ob11/body/elbow_ball_L.png",
+      "bbox": [
+        64,
+        719,
+        138,
+        793
+      ],
+      "size": [
+        74,
+        74
+      ]
+    },
+    "elbow_ball_R": {
+      "file": "parts/ob11/body/elbow_ball_R.png",
+      "bbox": [
+        437,
+        719,
+        511,
+        793
+      ],
+      "size": [
+        74,
+        74
+      ]
+    },
+    "wrist_ball_L": {
+      "file": "parts/ob11/body/wrist_ball_L.png",
+      "bbox": [
+        31,
+        859,
+        95,
+        923
+      ],
+      "size": [
+        64,
+        64
+      ]
+    },
+    "wrist_ball_R": {
+      "file": "parts/ob11/body/wrist_ball_R.png",
+      "bbox": [
+        480,
+        859,
+        544,
+        923
+      ],
+      "size": [
+        64,
+        64
+      ]
+    },
+    "knee_ball_L": {
+      "file": "parts/ob11/body/knee_ball_L.png",
+      "bbox": [
+        154,
+        1127,
+        230,
+        1203
+      ],
+      "size": [
+        76,
+        76
+      ]
+    },
+    "knee_ball_R": {
+      "file": "parts/ob11/body/knee_ball_R.png",
+      "bbox": [
+        345,
+        1127,
+        421,
+        1203
+      ],
+      "size": [
+        76,
+        76
+      ]
+    },
+    "ankle_ball_L": {
+      "file": "parts/ob11/body/ankle_ball_L.png",
+      "bbox": [
+        161,
+        1378,
+        211,
+        1428
+      ],
+      "size": [
+        50,
+        50
+      ]
+    },
+    "ankle_ball_R": {
+      "file": "parts/ob11/body/ankle_ball_R.png",
+      "bbox": [
+        364,
+        1378,
+        414,
+        1428
+      ],
+      "size": [
+        50,
+        50
+      ]
+    }
+  },
+  "slices": {
+    "upper_arm_L": {
+      "top": "parts/ob11/body/upper_arm_L_top.png",
+      "mid": "parts/ob11/body/upper_arm_L_mid.png",
+      "bot": "parts/ob11/body/upper_arm_L_bot.png",
+      "top_h": 41,
+      "mid_h_base": 108,
+      "bot_h": 41,
+      "total_h_base": 190,
+      "width": 126
+    },
+    "upper_arm_R": {
+      "top": "parts/ob11/body/upper_arm_R_top.png",
+      "mid": "parts/ob11/body/upper_arm_R_mid.png",
+      "bot": "parts/ob11/body/upper_arm_R_bot.png",
+      "top_h": 41,
+      "mid_h_base": 108,
+      "bot_h": 41,
+      "total_h_base": 190,
+      "width": 125
+    },
+    "forearm_L": {
+      "top": "parts/ob11/body/forearm_L_top.png",
+      "mid": "parts/ob11/body/forearm_L_mid.png",
+      "bot": "parts/ob11/body/forearm_L_bot.png",
+      "top_h": 26,
+      "mid_h_base": 93,
+      "bot_h": 29,
+      "total_h_base": 148,
+      "width": 102
+    },
+    "forearm_R": {
+      "top": "parts/ob11/body/forearm_R_top.png",
+      "mid": "parts/ob11/body/forearm_R_mid.png",
+      "bot": "parts/ob11/body/forearm_R_bot.png",
+      "top_h": 26,
+      "mid_h_base": 93,
+      "bot_h": 29,
+      "total_h_base": 148,
+      "width": 101
+    },
+    "thigh_L": {
+      "top": "parts/ob11/body/thigh_L_top.png",
+      "mid": "parts/ob11/body/thigh_L_mid.png",
+      "bot": "parts/ob11/body/thigh_L_bot.png",
+      "top_h": 41,
+      "mid_h_base": 150,
+      "bot_h": 41,
+      "total_h_base": 232,
+      "width": 159
+    },
+    "thigh_R": {
+      "top": "parts/ob11/body/thigh_R_top.png",
+      "mid": "parts/ob11/body/thigh_R_mid.png",
+      "bot": "parts/ob11/body/thigh_R_bot.png",
+      "top_h": 41,
+      "mid_h_base": 150,
+      "bot_h": 41,
+      "total_h_base": 232,
+      "width": 159
+    },
+    "shin_L": {
+      "top": "parts/ob11/body/shin_L_top.png",
+      "mid": "parts/ob11/body/shin_L_mid.png",
+      "bot": "parts/ob11/body/shin_L_bot.png",
+      "top_h": 36,
+      "mid_h_base": 153,
+      "bot_h": 36,
+      "total_h_base": 225,
+      "width": 121
+    },
+    "shin_R": {
+      "top": "parts/ob11/body/shin_R_top.png",
+      "mid": "parts/ob11/body/shin_R_mid.png",
+      "bot": "parts/ob11/body/shin_R_bot.png",
+      "top_h": 35,
+      "mid_h_base": 154,
+      "bot_h": 35,
+      "total_h_base": 224,
+      "width": 121
+    },
+    "torso": {
+      "top": "parts/ob11/body/torso_top.png",
+      "mid": "parts/ob11/body/torso_mid.png",
+      "bot": "parts/ob11/body/torso_bot.png",
+      "top_h": 225,
+      "mid_h_base": 75,
+      "bot_h": 200,
+      "total_h_base": 500,
+      "width": 301
+    }
+  }
+}

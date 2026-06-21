@@ -101,6 +101,27 @@
         .color-swatch.active { border-color: #333; box-shadow: 0 0 4px rgba(0,0,0,0.3); }
         .skin-color-input { width: 100%; height: 42px; padding: 3px; border: 1px solid #ddd; border-radius: 8px; background: #fff; cursor: pointer; }
         .custom-skin-row { display: none; }
+        .custom-body-controls {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            padding: 12px 0;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+        .custom-body-note { margin: 0; color: #777; font-size: 0.78rem; line-height: 1.4; }
+        .custom-body-control { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; }
+        .custom-body-control input[type="range"] { grid-column: 1 / -1; width: 100%; accent-color: #ff8fa3; }
+        .custom-body-value { color: #777; font-size: 0.82rem; font-variant-numeric: tabular-nums; }
+        .reset-custom-body {
+            min-height: 36px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #fff;
+            color: #444;
+            cursor: pointer;
+        }
+        #custom-body-host { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
 
         /* 右側畫布區 */
         .display-area {
@@ -243,6 +264,36 @@
                 </select>
         </div>
 
+        <div id="custom-body-controls" class="custom-body-controls">
+            <p class="custom-body-note">OB11 線稿參考版。數值為估算公分，預覽不取代實測。</p>
+            <div class="custom-body-control">
+                <label for="custom-torso">體長</label>
+                <span class="custom-body-value"><span id="custom-torso-value">4.10</span> cm</span>
+                <input id="custom-torso" type="range" min="0.90" max="1.15" step="0.01" value="1">
+            </div>
+            <div class="custom-body-control">
+                <label for="custom-upper-arm">上臂長</label>
+                <span class="custom-body-value"><span id="custom-upper-arm-value">1.56</span> cm</span>
+                <input id="custom-upper-arm" type="range" min="0.90" max="1.15" step="0.01" value="1">
+            </div>
+            <div class="custom-body-control">
+                <label for="custom-forearm">下臂長</label>
+                <span class="custom-body-value"><span id="custom-forearm-value">1.21</span> cm</span>
+                <input id="custom-forearm" type="range" min="0.90" max="1.15" step="0.01" value="1">
+            </div>
+            <div class="custom-body-control">
+                <label for="custom-thigh">大腿長</label>
+                <span class="custom-body-value"><span id="custom-thigh-value">1.90</span> cm</span>
+                <input id="custom-thigh" type="range" min="0.90" max="1.15" step="0.01" value="1">
+            </div>
+            <div class="custom-body-control">
+                <label for="custom-shin">小腿長</label>
+                <span class="custom-body-value"><span id="custom-shin-value">1.84</span> cm</span>
+                <input id="custom-shin" type="range" min="0.90" max="1.15" step="0.01" value="1">
+            </div>
+            <button id="reset-custom-body" class="reset-custom-body" type="button">重置尺寸</button>
+        </div>
+
         <hr style="border: 0; border-top: 1px solid #eee; margin: 5px 0;">
 
         <div class="control-group">
@@ -261,6 +312,7 @@
             <div class="doll-stage">
                 <div id="doll-skin-fill" class="doll-skin-fill"></div>
                 <img id="doll-mask" class="layer-img" style="z-index: 1;" src="dolls/body_ob11.png" alt="娃娃素體">
+                <div id="custom-body-host" style="display:none;"></div>
                 <div id="layer-strap" class="strap-layer"></div>
 
                 <div id="layer-main-color" class="bag-layer mask-layer" style="z-index:10;"></div>
@@ -313,6 +365,7 @@
             'OB11': { canvasSizePx: STANDARD_CANVAS_SIZE_PX, pxPerCm: STANDARD_PX_PER_CM, bodyLeftRatio: 0.3762, bodyTopRatio: 0.2060, strapShoulderXRatio: 0.46, strapShoulderYRatio: 0.43, bagXcm: 3.81, bagYcm: 7.61, bagSizeCm: 3.0, bagRotationDeg: -4 },
             '黏土娃': { canvasSizePx: STANDARD_CANVAS_SIZE_PX, pxPerCm: (STANDARD_CANVAS_SIZE_PX * 0.6306) / 11.1, bodyLeftRatio: 0.3940, bodyTopRatio: 0.2567, strapShoulderXRatio: 0.46, strapShoulderYRatio: 0.47, bagXcm: 3.41, bagYcm: 6.87, bagSizeCm: 3.0, bagRotationDeg: -4 },
             '新 P9': { canvasSizePx: STANDARD_CANVAS_SIZE_PX, pxPerCm: STANDARD_PX_PER_CM, bodyLeftRatio: 0.3540, bodyTopRatio: 0.2034, strapShoulderXRatio: 0.45, strapShoulderYRatio: 0.45, bagXcm: 3.92, bagYcm: 7.67, bagSizeCm: 3.0, bagRotationDeg: -4 },
+            '自訂尺寸': { canvasSizePx: STANDARD_CANVAS_SIZE_PX, pxPerCm: STANDARD_PX_PER_CM, bodyLeftRatio: 0.3762, bodyTopRatio: 0.2060, strapShoulderXRatio: 0.46, strapShoulderYRatio: 0.43, bagXcm: 3.81, bagYcm: 7.61, bagSizeCm: 3.0, bagRotationDeg: -4 },
             '10cm': { canvasSizePx: STANDARD_CANVAS_SIZE_PX, pxPerCm: (STANDARD_CANVAS_SIZE_PX * 0.6708) / 10, bodyLeftRatio: 0.2848, bodyTopRatio: 0.2142, strapShoulderXRatio: 0.40, strapShoulderYRatio: 0.45, bagXcm: 4.95, bagYcm: 7.89, bagSizeCm: 3.0, bagRotationDeg: -4 },
             '20cm': { canvasSizePx: LARGE_CANVAS_SIZE_PX, pxPerCm: (LARGE_CANVAS_SIZE_PX * 0.7823) / 20, bodyLeftRatio: 0.2765, bodyTopRatio: 0.1422, strapShoulderXRatio: 0.39, strapShoulderYRatio: 0.42, bagXcm: 8.96, bagYcm: 13.86, bagSizeCm: 3.0, bagRotationDeg: -4 }
         };
@@ -334,7 +387,7 @@
         function updateSubCategory() {
             const selectedMain = mainCategory.value;
             subCategory.innerHTML = '';
-            const opts = selectedMain === '12分' ? ['OB11', '黏土娃', '新 P9'] : ['10cm', '20cm'];
+            const opts = selectedMain === '12分' ? ['OB11', '黏土娃', '新 P9', '自訂尺寸'] : ['10cm', '20cm'];
             opts.forEach(opt => {
                 let el = document.createElement('option'); el.value = opt; el.textContent = opt;
                 subCategory.appendChild(el);
@@ -373,7 +426,20 @@
                 '10cm': 'dolls/body_10cm.png',
                 '20cm': 'dolls/body_20cm.png'
             };
-            dollMask.src = imageMapping[subCategory.value];
+            const isCustomBody = subCategory.value === '自訂尺寸';
+            if (!isCustomBody) dollMask.src = imageMapping[subCategory.value];
+            dollMask.style.display = isCustomBody ? 'none' : 'block';
+            skinFill.style.display = isCustomBody ? 'none' : 'block';
+            skinPreset.disabled = isCustomBody;
+            customSkinColor.disabled = isCustomBody;
+            if (isCustomBody) {
+                customSkinRow.style.display = 'none';
+            } else {
+                handleSkinPresetChange();
+            }
+            if (typeof window.setCustomBodyActive === 'function') {
+                window.setCustomBodyActive(isCustomBody);
+            }
             const preset = dollScalePresets[subCategory.value] || dollScalePresets['OB11'];
             canvas.style.width = `${preset.canvasSizePx}px`;
             canvas.style.height = `${preset.canvasSizePx}px`;
@@ -493,15 +559,15 @@
             layer.style.maskImage = cssMaskUrl;
         }
 
-        function applyStrapPlacement(preset, bagCenterX, bagCenterY, bagWidth, bagHeight) {
+        function applyStrapPlacement(preset, bagCenterX, bagCenterY, bagWidth, bagHeight, shoulderAnchor = null) {
             const strap = document.getElementById('layer-strap');
             const bagAngle = bagCalibration.rotationDeg * Math.PI / 180;
             const localAnchorX = (STRAP_HARDWARE_ANCHOR.xRatio - 0.5) * bagWidth;
             const localAnchorY = (STRAP_HARDWARE_ANCHOR.yRatio - 0.5) * bagHeight;
             const hardwareX = bagCenterX + (localAnchorX * Math.cos(bagAngle)) - (localAnchorY * Math.sin(bagAngle));
             const hardwareY = bagCenterY + (localAnchorX * Math.sin(bagAngle)) + (localAnchorY * Math.cos(bagAngle));
-            const shoulderX = preset.canvasSizePx * preset.strapShoulderXRatio;
-            const shoulderY = preset.canvasSizePx * preset.strapShoulderYRatio;
+            const shoulderX = shoulderAnchor ? shoulderAnchor.x : preset.canvasSizePx * preset.strapShoulderXRatio;
+            const shoulderY = shoulderAnchor ? shoulderAnchor.y : preset.canvasSizePx * preset.strapShoulderYRatio;
             const deltaX = hardwareX - shoulderX;
             const deltaY = hardwareY - shoulderY;
             const strapWidth = STRAP_WIDTH_CM * preset.pxPerCm;
@@ -521,8 +587,13 @@
             const heightPx = widthPx / BAG_IMAGE_RATIO;
             const originX = preset.canvasSizePx * preset.bodyLeftRatio;
             const originY = preset.canvasSizePx * preset.bodyTopRatio;
-            const leftPx = originX + (bagCalibration.xCm * pxPerCm) - (widthPx / 2);
-            const topPx = originY + (bagCalibration.yCm * pxPerCm) - (heightPx / 2);
+            const customAnchors = subCategory.value === '自訂尺寸' && typeof window.getCustomBodyAnchors === 'function'
+                ? window.getCustomBodyAnchors()
+                : null;
+            const bagCenterX = customAnchors ? customAnchors.hip.x : originX + (bagCalibration.xCm * pxPerCm);
+            const bagCenterY = customAnchors ? customAnchors.hip.y : originY + (bagCalibration.yCm * pxPerCm);
+            const leftPx = bagCenterX - (widthPx / 2);
+            const topPx = bagCenterY - (heightPx / 2);
             const layerIds = [
                 'layer-main-color',
                 'layer-tuxedo-color',
@@ -544,10 +615,11 @@
 
             applyStrapPlacement(
                 preset,
-                leftPx + (widthPx / 2),
-                topPx + (heightPx / 2),
+                bagCenterX,
+                bagCenterY,
                 widthPx,
-                heightPx
+                heightPx,
+                customAnchors ? customAnchors.shoulder : null
             );
         }
 
@@ -606,5 +678,6 @@
             handleSkinPresetChange();
         }
     </script>
+    <script src="custom-body.js"></script>
 </body>
 </html>
