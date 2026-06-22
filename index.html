@@ -282,7 +282,7 @@
         </div>
 
         <div class="control-group">
-            <label for="sub-category">體型款式</label>
+            <label for="sub-category">素體款式</label>
             <select id="sub-category" onchange="onDollOrBagChange()">
                 </select>
         </div>
@@ -395,7 +395,7 @@
             toast: { imageRatio: 378 / 354, strapAnchor: { xRatio: 0.064, yRatio: 0.22 }, strapColor: '#4b210f' },
             mini_messenger: { imageRatio: 383 / 363, strapAnchor: { xRatio: 0.075, yRatio: 0.025 }, strapColor: null }
         };
-        let strapWidthCm = 0.22;
+        const STRAP_WIDTH_CM = 0.22;
         const dollScalePresets = {
             'OB11': { canvasSizePx: STANDARD_CANVAS_SIZE_PX, pxPerCm: STANDARD_PX_PER_CM, bodyLeftRatio: 0.3762, bodyTopRatio: 0.2060, strapShoulderXRatio: 0.46, strapShoulderYRatio: 0.43, bagXcm: 3.81, bagYcm: 7.61, bagSizeCm: 3.0, bagRotationDeg: -4 },
             '黏土娃': { canvasSizePx: STANDARD_CANVAS_SIZE_PX, pxPerCm: (STANDARD_CANVAS_SIZE_PX * 0.6306) / 11.1, bodyLeftRatio: 0.3940, bodyTopRatio: 0.2567, strapShoulderXRatio: 0.46, strapShoulderYRatio: 0.47, bagXcm: 3.41, bagYcm: 6.87, bagSizeCm: 3.0, bagRotationDeg: -4 },
@@ -519,13 +519,6 @@
             if (bagStyle.value === 'toast') {
                 panel.innerHTML = `
                     <div class="control-group">
-                        <div class="range-head">
-                            <label for="strap-width-range">背帶寬度</label>
-                            <span class="range-value" id="strap-width-value">${strapWidthCm.toFixed(2)} cm</span>
-                        </div>
-                        <input id="strap-width-range" type="range" min="0.10" max="0.50" step="0.01" value="${strapWidthCm}" oninput="updateStrapWidth(this.value)">
-                    </div>
-                    <div class="control-group">
                         <label>五金顏色</label>
                         <select onchange="currentHardware=this.value; refreshLayers();">
                             <option value="hw-gold" ${currentHardware==='hw-gold'?'selected':''}>金</option>
@@ -643,13 +636,6 @@
             return maskImageCache.get(maskUrl);
         }
 
-        function updateStrapWidth(value) {
-            strapWidthCm = Number(value);
-            const output = document.getElementById('strap-width-value');
-            if (output) output.textContent = `${strapWidthCm.toFixed(2)} cm`;
-            applyBagPlacement();
-        }
-
         function updateReferenceGallery() {
             const gallery = document.getElementById('reference-gallery');
             const images = [
@@ -740,7 +726,7 @@
             const shoulderY = shoulderAnchor ? shoulderAnchor.y : preset.canvasSizePx * preset.strapShoulderYRatio;
             const deltaX = hardwareX - shoulderX;
             const deltaY = hardwareY - shoulderY;
-            const strapWidth = strapWidthCm * preset.pxPerCm;
+            const strapWidth = STRAP_WIDTH_CM * preset.pxPerCm;
 
             strap.style.left = `${shoulderX}px`;
             strap.style.top = `${shoulderY - (strapWidth / 2)}px`;
