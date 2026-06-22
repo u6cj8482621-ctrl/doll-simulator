@@ -689,12 +689,15 @@
             images[0].src = `${referenceConfig.path}${referenceConfig.fixed[0]}`;
             images[1].src = `${referenceConfig.path}${referenceConfig.fixed[1]}`;
             const bodyReference = referenceConfig.bodies[subCategory.value];
+            const bodyReferenceSlot = images[2].parentElement;
             if (bodyReference) {
                 images[2].src = `${referenceConfig.path}${bodyReference}`;
                 images[2].style.display = 'block';
+                bodyReferenceSlot.style.display = '';
             } else {
                 images[2].removeAttribute('src');
                 images[2].style.display = 'none';
+                bodyReferenceSlot.style.display = 'none';
             }
         }
 
