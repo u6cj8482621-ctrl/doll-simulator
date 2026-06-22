@@ -375,10 +375,10 @@
             { name: '薰衣草', hex: '#b8a1c9' }
         ];
         const hardwareColors = {
-            'hw-gold': '#d4af37',
-            'hw-silver': '#c0c0c0',
-            'hw-bronze': '#8c6239',
-            'hw-black': '#2b2b2b'
+            'hw-gold': '#ffe898',
+            'hw-silver': '#d4d5d7',
+            'hw-bronze': '#6f6446',
+            'hw-black': '#424039'
         };
 
         let currentMainColor = '#d4a373';
@@ -392,7 +392,7 @@
         const STANDARD_PX_PER_CM = (STANDARD_CANVAS_SIZE_PX * 0.6767) / OB11_REFERENCE_HEIGHT_CM;
         const bagStyleConfigs = {
             cat: { imageRatio: 397 / 316, strapAnchor: { xRatio: 0.045, yRatio: 0.04 }, strapColor: null },
-            toast: { imageRatio: 378 / 354, strapAnchor: { xRatio: 0.064, yRatio: 0.22 }, strapColor: '#4b210f' },
+            toast: { imageRatio: 378 / 354, strapAnchor: { xRatio: 0.064, yRatio: 0.22 }, strapColor: '#481502' },
             mini_messenger: { imageRatio: 383 / 363, strapAnchor: { xRatio: 0.075, yRatio: 0.025 }, strapColor: null }
         };
         const STRAP_WIDTH_CM = 0.22;
@@ -518,6 +518,13 @@
             const panel = document.getElementById('dynamic-options');
             if (bagStyle.value === 'toast') {
                 panel.innerHTML = `
+                    <div class="control-group">
+                        <label>背帶顏色</label>
+                        <select onchange="bagStyleConfigs.toast.strapColor=this.value; applyBagPlacement();">
+                            <option value="#481502" ${bagStyleConfigs.toast.strapColor==='#481502'?'selected':''}>深咖</option>
+                            <option value="#f7d0b7" ${bagStyleConfigs.toast.strapColor==='#f7d0b7'?'selected':''}>原皮</option>
+                        </select>
+                    </div>
                     <div class="control-group">
                         <label>五金顏色</label>
                         <select onchange="currentHardware=this.value; refreshLayers();">
