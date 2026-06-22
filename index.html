@@ -324,6 +324,7 @@
             <select id="bag-style" onchange="onDollOrBagChange()">
                 <option value="cat" selected>貓貓包</option>
                 <option value="toast">吐司包</option>
+                <option value="mini_messenger">小型郵差包</option>
             </select>
         </div>
 
@@ -353,8 +354,8 @@
             </div>
         </div>
         <aside id="reference-gallery" class="reference-gallery" aria-label="實品參考圖片" hidden>
-            <div class="reference-slot"><img id="reference-image-1" loading="lazy" alt="吐司包實品參考圖一"></div>
-            <div class="reference-slot"><img id="reference-image-2" loading="lazy" alt="吐司包實品參考圖二"></div>
+            <div class="reference-slot"><img id="reference-image-1" loading="lazy" alt="包包實品參考圖一"></div>
+            <div class="reference-slot"><img id="reference-image-2" loading="lazy" alt="包包實品參考圖二"></div>
             <div class="reference-slot"><img id="reference-image-3" loading="lazy" alt="對應素體實品參考圖"></div>
         </aside>
         </div>
@@ -391,7 +392,8 @@
         const STANDARD_PX_PER_CM = (STANDARD_CANVAS_SIZE_PX * 0.6767) / OB11_REFERENCE_HEIGHT_CM;
         const bagStyleConfigs = {
             cat: { imageRatio: 397 / 316, strapAnchor: { xRatio: 0.045, yRatio: 0.04 }, strapColor: null },
-            toast: { imageRatio: 378 / 354, strapAnchor: { xRatio: 0.064, yRatio: 0.22 }, strapColor: '#4b210f' }
+            toast: { imageRatio: 378 / 354, strapAnchor: { xRatio: 0.064, yRatio: 0.22 }, strapColor: '#4b210f' },
+            mini_messenger: { imageRatio: 383 / 363, strapAnchor: { xRatio: 0.075, yRatio: 0.025 }, strapColor: null }
         };
         let strapWidthCm = 0.22;
         const dollScalePresets = {
@@ -535,6 +537,25 @@
                 `;
                 return;
             }
+            if (bagStyle.value === 'mini_messenger') {
+                panel.innerHTML = `
+                    <div class="control-group">
+                        <label>包包主體顏色</label>
+                        <div class="color-palette" id="main-pal"></div>
+                    </div>
+                    <div class="control-group">
+                        <label>五金顏色</label>
+                        <select onchange="currentHardware=this.value; refreshLayers();">
+                            <option value="hw-gold" ${currentHardware==='hw-gold'?'selected':''}>金</option>
+                            <option value="hw-silver" ${currentHardware==='hw-silver'?'selected':''}>銀</option>
+                            <option value="hw-bronze" ${currentHardware==='hw-bronze'?'selected':''}>古銅</option>
+                            <option value="hw-black" ${currentHardware==='hw-black'?'selected':''}>槍黑</option>
+                        </select>
+                    </div>
+                `;
+                buildPalette('main-pal', 'main');
+                return;
+            }
             panel.innerHTML = `
                 <div class="control-group">
                     <label>花色款式</label>
@@ -636,21 +657,47 @@
                 document.getElementById('reference-image-2'),
                 document.getElementById('reference-image-3')
             ];
-            const isToast = bagStyle.value === 'toast';
-            gallery.hidden = !isToast;
-            if (!isToast) return;
-
-            images[0].src = 'bags/toast/toast_001.jpg';
-            images[1].src = 'bags/toast/toast_002.jpg';
-            const bodyReferences = {
-                'OB11': 'toast_ob11.jpg',
-                '黏土娃': 'toast_Nendoroid_Doll.jpg',
-                '10cm': 'toast_10cm.jpg',
-                '20cm': 'toast_20cm.jpg'
+            const referenceConfigs = {
+                cat: {
+                    path: 'bags/cat/',
+                    fixed: ['cat_01.jpg', 'cat_02.jpg'],
+                    bodies: {
+                        'OB11': 'cat_ob11.jpg',
+                        '黏土娃': 'cat_Nendoroid_Doll.jpg',
+                        '10cm': 'cat_10cm.jpg',
+                        '20cm': 'cat_20cm.jpg'
+                    }
+                },
+                toast: {
+                    path: 'bags/toast/',
+                    fixed: ['toast_001.jpg', 'toast_002.jpg'],
+                    bodies: {
+                        'OB11': 'toast_ob11.jpg',
+                        '黏土娃': 'toast_Nendoroid_Doll.jpg',
+                        '10cm': 'toast_10cm.jpg',
+                        '20cm': 'toast_20cm.jpg'
+                    }
+                },
+                mini_messenger: {
+                    path: 'bags/mini_messenger/',
+                    fixed: ['mini_messenger_01.jpg', 'mini_messenger_02.jpg'],
+                    bodies: {
+                        'OB11': 'mini_messenger_ob11.jpg',
+                        '黏土娃': 'mini_messenger_Nendoroid_Doll.jpg',
+                        '10cm': 'mini_messenger_10cm.jpg',
+                        '20cm': 'mini_messenger_20cm.jpg'
+                    }
+                }
             };
-            const bodyReference = bodyReferences[subCategory.value];
+            const referenceConfig = referenceConfigs[bagStyle.value];
+            gallery.hidden = !referenceConfig;
+            if (!referenceConfig) return;
+
+            images[0].src = `${referenceConfig.path}${referenceConfig.fixed[0]}`;
+            images[1].src = `${referenceConfig.path}${referenceConfig.fixed[1]}`;
+            const bodyReference = referenceConfig.bodies[subCategory.value];
             if (bodyReference) {
-                images[2].src = `bags/toast/${bodyReference}`;
+                images[2].src = `${referenceConfig.path}${bodyReference}`;
                 images[2].style.display = 'block';
             } else {
                 images[2].removeAttribute('src');
@@ -771,6 +818,23 @@
                 lTuxLine.className = 'bag-layer lineart-overlay';
                 lTuxLine.src = 'bags/toast/toast_hardware_line.png';
                 setMaskLayer(lHardware, 'bags/toast/toast_hardware_mask.png', hardwareColors[currentHardware]);
+                applyBagPlacement();
+                return;
+            }
+
+            if (bagStyle.value === 'mini_messenger') {
+                lMainColor.style.display = 'block';
+                setMaskLayer(lMainColor, 'bags/mini_messenger/mini_messenger_base_mask.png', currentMainColor);
+                lTuxColor.style.display = 'none';
+                lCalico.style.display = 'none';
+                lFace.style.display = 'none';
+                lMainLine.style.display = 'block';
+                lMainLine.className = 'bag-layer lineart-overlay';
+                lMainLine.src = 'bags/mini_messenger/mini_messenger_line.png';
+                lTuxLine.style.display = 'block';
+                lTuxLine.className = 'bag-layer lineart-overlay';
+                lTuxLine.src = 'bags/mini_messenger/mini_messenger_hardware_line.png';
+                setMaskLayer(lHardware, 'bags/mini_messenger/mini_messenger_hardware_mask.png', hardwareColors[currentHardware]);
                 applyBagPlacement();
                 return;
             }
