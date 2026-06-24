@@ -325,6 +325,7 @@
                 <option value="cat" selected>貓貓包</option>
                 <option value="toast">吐司包</option>
                 <option value="mini_messenger">小型郵差包</option>
+                <option value="cylinder">圓筒包</option>
             </select>
         </div>
 
@@ -382,6 +383,7 @@
         };
 
         let currentMainColor = '#d4a373';
+        let currentCylinderColor = '#f8f9fa';
         let currentTuxedoColor = '#f8f9fa';
         let currentHardware = 'hw-gold';
         let currentExpression = 'face-none';
@@ -393,7 +395,8 @@
         const bagStyleConfigs = {
             cat: { imageRatio: 397 / 316, strapAnchor: { xRatio: 0.045, yRatio: 0.04 }, strapColor: null },
             toast: { imageRatio: 378 / 354, strapAnchor: { xRatio: 0.064, yRatio: 0.22 }, strapColor: '#481502' },
-            mini_messenger: { imageRatio: 383 / 363, strapAnchor: { xRatio: 0.075, yRatio: 0.025 }, strapColor: null }
+            mini_messenger: { imageRatio: 383 / 363, strapAnchor: { xRatio: 0.075, yRatio: 0.025 }, strapColor: null },
+            cylinder: { imageRatio: 330 / 263, strapAnchor: { xRatio: 0.075, yRatio: 0.08 }, strapColor: null }
         };
         const STRAP_WIDTH_CM = 0.22;
         const STRAP_LENGTH_RATIOS = { '10cm': 0.72, '20cm': 0.70 };
@@ -556,6 +559,25 @@
                 buildPalette('main-pal', 'main');
                 return;
             }
+            if (bagStyle.value === 'cylinder') {
+                panel.innerHTML = `
+                    <div class="control-group">
+                        <label>包包主體顏色</label>
+                        <div class="color-palette" id="main-pal"></div>
+                    </div>
+                    <div class="control-group">
+                        <label>五金顏色</label>
+                        <select onchange="currentHardware=this.value; refreshLayers();">
+                            <option value="hw-gold" ${currentHardware==='hw-gold'?'selected':''}>金</option>
+                            <option value="hw-silver" ${currentHardware==='hw-silver'?'selected':''}>銀</option>
+                            <option value="hw-bronze" ${currentHardware==='hw-bronze'?'selected':''}>古銅</option>
+                            <option value="hw-black" ${currentHardware==='hw-black'?'selected':''}>槍黑</option>
+                        </select>
+                    </div>
+                `;
+                buildPalette('main-pal', 'cylinder');
+                return;
+            }
             panel.innerHTML = `
                 <div class="control-group">
                     <label>花色款式</label>
@@ -616,12 +638,14 @@
                 swatch.title = `${color.name} ${color.hex}`;
                 
                 if(type === 'main' && color.hex === currentMainColor) swatch.classList.add('active');
+                if(type === 'cylinder' && color.hex === currentCylinderColor) swatch.classList.add('active');
                 if(type === 'tuxedo' && color.hex === currentTuxedoColor) swatch.classList.add('active');
 
                 swatch.onclick = function() {
                     target.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
                     swatch.classList.add('active');
                     if(type === 'main') { currentMainColor = color.hex; }
+                    if(type === 'cylinder') { currentCylinderColor = color.hex; }
                     if(type === 'tuxedo') { currentTuxedoColor = color.hex; }
                     refreshLayers();
                 };
@@ -745,7 +769,7 @@
             strap.style.top = `${shoulderY - (strapWidth / 2)}px`;
             strap.style.width = `${Math.hypot(deltaX, deltaY)}px`;
             strap.style.height = `${strapWidth}px`;
-            strap.style.backgroundColor = styleConfig.strapColor || currentMainColor;
+            strap.style.backgroundColor = styleConfig.strapColor || (bagStyle.value === 'cylinder' ? currentCylinderColor : currentMainColor);
             strap.style.transform = `rotate(${Math.atan2(deltaY, deltaX) * 180 / Math.PI}deg)`;
         }
 
@@ -834,6 +858,23 @@
                 lTuxLine.className = 'bag-layer lineart-overlay';
                 lTuxLine.src = 'bags/mini_messenger/mini_messenger_hardware_line.png';
                 setMaskLayer(lHardware, 'bags/mini_messenger/mini_messenger_hardware_mask.png', hardwareColors[currentHardware]);
+                applyBagPlacement();
+                return;
+            }
+
+            if (bagStyle.value === 'cylinder') {
+                lMainColor.style.display = 'block';
+                setMaskLayer(lMainColor, 'bags/cylinder/cylinder_base_mask.png', currentCylinderColor);
+                lTuxColor.style.display = 'none';
+                lCalico.style.display = 'none';
+                lFace.style.display = 'none';
+                lMainLine.style.display = 'block';
+                lMainLine.className = 'bag-layer lineart-overlay';
+                lMainLine.src = 'bags/cylinder/cylinder_line.png';
+                lTuxLine.style.display = 'block';
+                lTuxLine.className = 'bag-layer lineart-overlay';
+                lTuxLine.src = 'bags/cylinder/cylinder_hardware_line.png';
+                setMaskLayer(lHardware, 'bags/cylinder/cylinder_hardware_mask.png', hardwareColors[currentHardware]);
                 applyBagPlacement();
                 return;
             }
