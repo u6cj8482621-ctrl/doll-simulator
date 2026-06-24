@@ -11,13 +11,13 @@
         headChest: { file: 'custom_head_chest_half', box: [53, 0, 292, 707], z: 7 },
         waist: { file: 'custom_waist_half', box: [163, 646, 292, 814], z: 5, control: 'waist' },
         pelvis: { file: 'custom_pelvis_half', box: [138, 761, 292, 952], z: 6 },
-        shoulderJoint: { file: 'custom_shoulder_joint_half', box: [127, 542, 199, 614], z: 12 },
+        shoulderJoint: { file: 'custom_shoulder_joint_half', box: [127, 542, 199, 614], z: 2 },
         upperArm: { file: 'custom_upper_arm_half', box: [54, 565, 170, 744], z: 10, control: 'upperArm' },
-        elbowJoint: { file: 'custom_elbow_joint_half', box: [64, 718, 136, 790], z: 13 },
+        elbowJoint: { file: 'custom_elbow_joint_half', box: [64, 718, 136, 790], z: 2 },
         lowerArm: { file: 'custom_lower_arm_half', box: [27, 744, 120, 882], z: 11, control: 'lowerArm' },
         hand: { file: 'custom_hand_half', box: [0, 856, 100, 1063], z: 14 },
         thigh: { file: 'custom_thigh_half', box: [129, 907, 265, 1137], z: 10, control: 'thigh' },
-        kneeJoint: { file: 'custom_knee_joint_half', box: [134, 1133, 248, 1193], z: 13 },
+        kneeJoint: { file: 'custom_knee_joint_half', box: [134, 1133, 248, 1193], z: 2 },
         calf: { file: 'custom_calf_half', box: [134, 1179, 246, 1394], z: 11, control: 'calf' },
         foot: { file: 'custom_foot_half', box: [102, 1362, 230, 1525], z: 14 }
     };
