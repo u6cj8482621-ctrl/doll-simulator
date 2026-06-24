@@ -83,10 +83,10 @@
     function drawMask(canvas, img, box, color) {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawMirroredCrop(ctx, img, box);
+        ctx.globalCompositeOperation = 'source-in';
         ctx.fillStyle = color;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.globalCompositeOperation = 'destination-in';
-        drawMirroredCrop(ctx, img, box);
         ctx.globalCompositeOperation = 'source-over';
     }
 
