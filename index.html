@@ -403,7 +403,7 @@
         const dollScalePresets = {
             'OB11': { canvasSizePx: STANDARD_CANVAS_SIZE_PX, pxPerCm: STANDARD_PX_PER_CM, bodyLeftRatio: 0.3762, bodyTopRatio: 0.2060, strapShoulderXRatio: 0.46, strapShoulderYRatio: 0.43, bagXcm: 3.81, bagYcm: 7.61, bagSizeCm: 3.0, bagRotationDeg: -4 },
             '黏土娃': { canvasSizePx: STANDARD_CANVAS_SIZE_PX, pxPerCm: (STANDARD_CANVAS_SIZE_PX * 0.6306) / 11.1, bodyLeftRatio: 0.3940, bodyTopRatio: 0.2567, strapShoulderXRatio: 0.46, strapShoulderYRatio: 0.47, bagXcm: 3.41, bagYcm: 6.87, bagSizeCm: 3.0, bagRotationDeg: -4 },
-            '新 P9': { canvasSizePx: STANDARD_CANVAS_SIZE_PX, pxPerCm: STANDARD_PX_PER_CM, bodyLeftRatio: 0.3540, bodyTopRatio: 0.2034, strapShoulderXRatio: 0.385, strapShoulderYRatio: 0.460, bagXcm: 3.92, bagYcm: 7.67, bagSizeCm: 3.0, bagRotationDeg: -4 },
+            'P9': { canvasSizePx: STANDARD_CANVAS_SIZE_PX, pxPerCm: STANDARD_PX_PER_CM, bodyLeftRatio: 0.3540, bodyTopRatio: 0.2034, strapShoulderXRatio: 0.370, strapShoulderYRatio: 0.445, bagXcm: 3.92, bagYcm: 7.67, bagSizeCm: 3.0, bagRotationDeg: -4 },
             '自訂尺寸': { canvasSizePx: STANDARD_CANVAS_SIZE_PX, pxPerCm: STANDARD_PX_PER_CM, bodyLeftRatio: 0.3762, bodyTopRatio: 0.2060, strapShoulderXRatio: 0.46, strapShoulderYRatio: 0.43, bagXcm: 3.81, bagYcm: 7.61, bagSizeCm: 3.0, bagRotationDeg: -4 },
             '10cm': { canvasSizePx: STANDARD_CANVAS_SIZE_PX, pxPerCm: (STANDARD_CANVAS_SIZE_PX * 0.6708) / 10, bodyLeftRatio: 0.2848, bodyTopRatio: 0.2142, strapShoulderXRatio: 0.300, strapShoulderYRatio: 0.530, bagXcm: 4.95, bagYcm: 7.89, bagSizeCm: 3.0, bagRotationDeg: -4 },
             '20cm': { canvasSizePx: LARGE_CANVAS_SIZE_PX, pxPerCm: (LARGE_CANVAS_SIZE_PX * 0.7823) / 20, bodyLeftRatio: 0.2765, bodyTopRatio: 0.1422, strapShoulderXRatio: 0.283, strapShoulderYRatio: 0.467, bagXcm: 8.96, bagYcm: 14.86, bagSizeCm: 3.0, bagRotationDeg: -4 }
@@ -427,7 +427,7 @@
         function updateSubCategory() {
             const selectedMain = mainCategory.value;
             subCategory.innerHTML = '';
-            const opts = selectedMain === '12分' ? ['OB11', '黏土娃', '新 P9', '自訂尺寸'] : ['10cm', '20cm'];
+            const opts = selectedMain === '12分' ? ['OB11', '黏土娃', 'P9', '自訂尺寸'] : ['10cm', '20cm'];
             opts.forEach(opt => {
                 let el = document.createElement('option'); el.value = opt; el.textContent = opt;
                 subCategory.appendChild(el);
@@ -465,7 +465,7 @@
             const imageMapping = {
                 'OB11': 'dolls/body_ob11.png',
                 '黏土娃': 'dolls/body_Nendoroid_Doll.png',
-                '新 P9': 'dolls/body_p9.png',
+                'P9': 'dolls/body_p9.png',
                 '10cm': 'dolls/body_10cm.png',
                 '20cm': 'dolls/body_20cm.png'
             };
