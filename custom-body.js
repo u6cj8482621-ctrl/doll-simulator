@@ -5,6 +5,7 @@
     const DISPLAY_SCALE = (CANVAS_SIZE * 0.6767) / SOURCE.height;
     const BODY_LEFT = (CANVAS_SIZE - (SOURCE.width * DISPLAY_SCALE)) / 2;
     const SOURCE_PX_PER_CM = SOURCE.height / SOURCE.referenceHeightCm;
+    const DISPLAY_PX_PER_CM = SOURCE_PX_PER_CM * DISPLAY_SCALE;
 
     const CUSTOM_DIR = 'parts/custom';
     const PARTS = {
@@ -148,34 +149,35 @@
         }));
     }
 
-    function readControlScales() {
-        const scales = {};
+    function readControlAdjustments() {
+        const adjustments = {};
         Object.entries(CONTROL_GROUPS).forEach(([key, config]) => {
             const slider = document.getElementById(config.sliderId);
-            scales[key] = slider ? Number(slider.value) : 1;
+            adjustments[key] = slider ? Number(slider.value) : 0;
         });
-        return scales;
+        return adjustments;
     }
 
-    function updateValueLabels(scales) {
+    function updateValueLabels(adjustments) {
         Object.entries(CONTROL_GROUPS).forEach(([key, config]) => {
-            const part = PARTS[config.labelPart];
-            const box = fullBoxFromHalfBox(part.box);
             const value = document.getElementById(config.valueId);
-            if (value) value.textContent = ((box.fullHeight * scales[key]) / SOURCE_PX_PER_CM).toFixed(2);
+            if (value) {
+                const adjustment = adjustments[key];
+                value.textContent = `${adjustment >= 0 ? '+' : ''}${adjustment.toFixed(1)}`;
+            }
         });
     }
 
     function applyCustomBodyShape() {
         if (!Object.keys(rendered).length) return;
-        const scales = readControlScales();
+        const adjustments = readControlAdjustments();
         const deltas = {};
 
         Object.entries(rendered).forEach(([name, item]) => {
-            const scale = item.control ? scales[item.control] : 1;
-            item.element.style.height = `${item.baseHeight * scale}px`;
+            const delta = item.control ? adjustments[item.control] * DISPLAY_PX_PER_CM : 0;
+            item.element.style.height = `${Math.max(1, item.baseHeight + delta)}px`;
             if (item.control) {
-                deltas[name] = item.baseHeight * (scale - 1);
+                deltas[name] = delta;
             }
         });
 
@@ -191,7 +193,7 @@
         });
 
         currentDeltas = deltas;
-        updateValueLabels(scales);
+        updateValueLabels(adjustments);
         if (active && typeof window.applyBagPlacement === 'function') {
             requestAnimationFrame(window.applyBagPlacement);
         }
@@ -200,7 +202,7 @@
     function resetCustomBody() {
         Object.values(CONTROL_GROUPS).forEach(config => {
             const slider = document.getElementById(config.sliderId);
-            if (slider) slider.value = '1';
+            if (slider) slider.value = '0';
         });
         applyCustomBodyShape();
     }
